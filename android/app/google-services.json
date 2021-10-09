@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "507627130402",
+    "project_id": "democracy-b4638",
+    "storage_bucket": "democracy-b4638.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:507627130402:android:971b7e8d1bc7b09e90c47b",
+        "android_client_info": {
+          "package_name": "com.example.admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "507627130402-ct4fs3pshbef0kua92utpg8d38f3naog.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBx56NTd2ez7DllBXZPoe7Z6ahJjv7moP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "507627130402-ct4fs3pshbef0kua92utpg8d38f3naog.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
