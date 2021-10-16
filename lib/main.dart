@@ -1,3 +1,4 @@
+import 'package:admin/routes/scan.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -18,18 +19,23 @@ class _VoterAdminAppState extends State<VoterAdminApp> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        throw FirebaseException(
-            plugin: "firebase_core", message: "Error in initialization");
-      }
-      if (snapshot.connectionState == ConnectionState.done) {
-        return MyHomePage();
-      }
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    });
+    return MaterialApp(
+      home: FutureBuilder(
+          future: _initialization,
+          builder: (context, snapshot) {
+            print(snapshot.connectionState);
+            if (snapshot.hasError) {
+              throw FirebaseException(
+                  plugin: "firebase_core", message: "Error in initialization");
+            }
+            if (snapshot.connectionState == ConnectionState.done) {
+              return QRViewExample();
+            }
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }),
+    );
   }
 }
 
