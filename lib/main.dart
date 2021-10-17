@@ -1,10 +1,13 @@
+// import 'package:admin/routes/register.dart';
 import 'package:admin/routes/scan.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(VoterAdminApp());
+  await dotenv.load(fileName: ".env");
+  runApp(const VoterAdminApp());
 }
 
 class VoterAdminApp extends StatefulWidget {
@@ -29,7 +32,12 @@ class _VoterAdminAppState extends State<VoterAdminApp> {
                   plugin: "firebase_core", message: "Error in initialization");
             }
             if (snapshot.connectionState == ConnectionState.done) {
-              return QRViewExample();
+              return MaterialApp(
+                home: QRViewExample(),
+                // routes: {
+                //   RegisterPage.routeName: (_) => RegisterPage(),
+                // },
+              );
             }
             return Center(
               child: CircularProgressIndicator(),
