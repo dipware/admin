@@ -48,7 +48,7 @@ class _QRViewExampleState extends State<QRViewExample> {
                   else
                     Text('Scan a code'),
                   if (result != null)
-                    Text(result!.code)
+                    Text(result!.code!)
                   else
                     Text('Scan a code'),
                   Row(
@@ -141,7 +141,7 @@ class _QRViewExampleState extends State<QRViewExample> {
         setState(() {
           result = scanData;
           if (!_voterKeys.contains(scanData.code)) {
-            _voterKeys.add(scanData.code);
+            _voterKeys.add(scanData.code!);
           }
         });
       },
