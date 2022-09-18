@@ -32,7 +32,7 @@ class _VoterAdminAppState extends State<VoterAdminApp> {
             print(snapshot.connectionState);
             if (snapshot.hasError) {
               throw FirebaseException(
-                  plugin: "firebaseore", message: "${snapshot.error}");
+                  plugin: "firebase_core", message: "${snapshot.error}");
             }
             if (snapshot.connectionState == ConnectionState.done) {
               return MaterialApp(
