@@ -8,7 +8,7 @@ import 'package:web3dart/web3dart.dart';
 class WalletStorage {
   Future<String> get _localWalletPath async {
     final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
+    return '${directory.path}/wallets';
   }
 
   Future<File> writeWallet(String password) async {
@@ -21,7 +21,16 @@ class WalletStorage {
     return walletFile.writeAsString(wallet.toJson());
   }
 
-  Future<File> loadWallet(String password) async {
+  // Future<File> loadWallet(String password) async {
+  //   final path = await _localWalletPath;
+  //   entities.forEach(print);
+  // }
+
+  Future<List<File>> get wallets async {
     final path = await _localWalletPath;
+    final dir = Directory(path);
+    final List<FileSystemEntity> entities = await dir.list().toList();
+    final files = entities.whereType<File>().toList();
+    return files;
   }
 }
