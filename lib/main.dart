@@ -1,10 +1,14 @@
 // import 'package:admin/routes/register.dart';
-import 'package:admin/routes/scan.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'routes/home.dart';
+import 'routes/scan.dart';
+import 'utils/style.dart';
+
 import 'firebase_options.dart';
+import 'routes/register.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,13 +40,15 @@ class _VoterAdminAppState extends State<VoterAdminApp> {
             }
             if (snapshot.connectionState == ConnectionState.done) {
               return MaterialApp(
-                home: QRViewExample(),
-                // routes: {
-                //   RegisterPage.routeName: (_) => RegisterPage(),
-                // },
+                home: HomePage(),
+                theme: themeData,
+                routes: {
+                  ScanPage.routeName: (_) => ScanPage(),
+                  // RegisterPage.routeName: (_) => RegisterPage(),
+                },
               );
             }
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           }),
