@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:admin/routes/wallet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -119,7 +120,9 @@ class _HomePageState extends State<HomePage> {
             children: [
               TextButton(
                 style: Theme.of(context).textButtonTheme.style,
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, WalletPage.routeName);
+                },
                 child: const Text(
                   "Get Started",
                 ),
