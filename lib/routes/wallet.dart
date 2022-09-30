@@ -13,10 +13,12 @@ class WalletPage extends StatefulWidget {
 
 class _WalletPageState extends State<WalletPage> {
   List<Text> _wallets = [];
+  late TextEditingController _pw_controller;
 
   @override
   void initState() {
     super.initState();
+    _pw_controller = TextEditingController();
     widget.walletStorage.wallets.then((wallets) {
       setState(() {
         _wallets = wallets.map((file) {
@@ -36,7 +38,43 @@ class _WalletPageState extends State<WalletPage> {
           TextButton(
             style: Theme.of(context).textButtonTheme.style,
             onPressed: () {
-              // widget.walletStorage.writeWallet(password);
+              showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                builder: (BuildContext context) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom),
+                    child: Container(
+                      height: 200,
+                      color: Theme.of(context).bottomSheetTheme.backgroundColor,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            TextField(
+                              controller: _pw_controller,
+                              onSubmitted: (value) {
+                                widget.walletStorage
+                                    .writeWallet(_pw_controller.text);
+                                Navigator.pop(context);
+                                setState(() {});
+                              },
+                              decoration: const InputDecoration(
+                                  hintText: "Choose A Wallet Password"),
+                            ),
+                            ElevatedButton(
+                              child: const Text('Cancel'),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
             },
             child: const Text(
               "New Wallet",
