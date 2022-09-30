@@ -29,6 +29,8 @@ class WalletStorage {
   Future<List<File>> get wallets async {
     final path = await _localWalletPath;
     final dir = Directory(path);
+    await dir.create();
+    print(dir.path);
     final List<FileSystemEntity> entities = await dir.list().toList();
     final files = entities.whereType<File>().toList();
     return files;
