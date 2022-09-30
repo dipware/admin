@@ -13,11 +13,13 @@ class WalletPage extends StatefulWidget {
 class _WalletPageState extends State<WalletPage> {
   List<Card> _wallets = [];
   late TextEditingController _pw_controller;
+  late TextEditingController _name_controller;
 
   @override
   void initState() {
     super.initState();
     _pw_controller = TextEditingController();
+    _name_controller = TextEditingController();
     fetchWallets();
   }
 
@@ -40,6 +42,7 @@ class _WalletPageState extends State<WalletPage> {
     // TODO: implement dispose
     super.dispose();
     _pw_controller.dispose();
+    _name_controller.dispose();
   }
 
   @override
@@ -75,20 +78,32 @@ class _WalletPageState extends State<WalletPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
                               TextField(
+                                autofocus: true,
+                                textInputAction: TextInputAction.next,
+                                controller: _name_controller,
+                                decoration: const InputDecoration(
+                                    hintText: "Name Your Vote"),
+                              ),
+                              TextField(
                                 controller: _pw_controller,
                                 onSubmitted: (value) {
-                                  widget.walletStorage
-                                      .writeWallet(_pw_controller.text);
+                                  widget.walletStorage.writeWallet(
+                                      _name_controller.text,
+                                      _pw_controller.text);
                                   fetchWallets();
                                   _pw_controller.clear();
                                   Navigator.pop(context);
                                 },
                                 decoration: const InputDecoration(
-                                    hintText: "Choose A Wallet Password"),
+                                    hintText: "Choose A Password"),
                               ),
                               ElevatedButton(
                                 child: const Text('Cancel'),
-                                onPressed: () => Navigator.pop(context),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _name_controller.clear();
+                                  _pw_controller.clear();
+                                },
                               ),
                             ],
                           ),

@@ -11,12 +11,11 @@ class WalletStorage {
     return '${directory.path}/wallets';
   }
 
-  Future<File> writeWallet(String password) async {
+  Future<File> writeWallet(String name, String password) async {
     final path = await _localWalletPath;
     var random = Random.secure();
     EthPrivateKey credentials = EthPrivateKey.createRandom(random);
-    final address = await credentials.extractAddress();
-    final walletFile = File('$path/$address.json');
+    final walletFile = File('$path/$name.json');
     Wallet wallet = Wallet.createNew(credentials, password, random);
     return walletFile.writeAsString(wallet.toJson());
   }
