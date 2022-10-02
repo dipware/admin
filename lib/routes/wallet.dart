@@ -45,15 +45,26 @@ class _WalletPageState extends State<WalletPage> {
           final title = filename.split('{').first;
           final addressRe = RegExp(r'0x[a-fA-F0-9]{40}');
           final address = addressRe.firstMatch(filename)![0];
-          final blockchain = Provider.of<BlockChain>(context);
+          final blockchain = Provider.of<BlockChain>(context, listen: false);
           blockchain.add(address!);
           // final balance = Web3Client(url, httpClient)
           return Card(
             child: ListTile(
-              // onTap: (() => Navigator.pushNamed(context, routeName),
-              title: Text(title),
-              subtitle: Text('${blockchain.balances[address]}'),
-            ),
+                // onTap: (() => Navigator.pushNamed(context, routeName),
+                title: Text(title),
+                subtitle: Consumer<BlockChain>(
+                  builder: (context, value, child) {
+                    if (value.balances[address] == null) {
+                      return Row(
+                        children: [
+                          CircularProgressIndicator(),
+                        ],
+                      );
+                    }
+                    return Text('${value.balances[address]}');
+                  },
+                ) // child: Text('${blockchain.balances[address]}')),
+                ),
           );
         }).toList();
       });
