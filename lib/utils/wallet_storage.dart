@@ -15,7 +15,8 @@ class WalletStorage {
     final path = await _localWalletPath;
     var random = Random.secure();
     EthPrivateKey credentials = EthPrivateKey.createRandom(random);
-    final walletFile = File('$path/$name.json');
+    final address = await credentials.extractAddress();
+    final walletFile = File('$path/$name{${address.hex}}.json');
     Wallet wallet = Wallet.createNew(credentials, password, random);
     return walletFile.writeAsString(wallet.toJson());
   }
