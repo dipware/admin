@@ -121,7 +121,7 @@ class _HomePageState extends State<HomePage> {
               TextButton(
                 style: Theme.of(context).textButtonTheme.style,
                 onPressed: () {
-                  Navigator.pushReplacementNamed(context, WalletPage.routeName);
+                  Navigator.pushNamed(context, WalletPage.routeName);
                 },
                 child: const Text(
                   "Get Started",
