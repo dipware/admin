@@ -1,9 +1,11 @@
 // import 'package:admin/routes/register.dart';
+import 'package:admin/providers/blockchain.dart';
 import 'package:admin/routes/wallet.dart';
 import 'package:admin/utils/wallet_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 
 import 'routes/home.dart';
 import 'routes/scan.dart';
@@ -31,31 +33,33 @@ class _VoterAdminAppState extends State<VoterAdminApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: FutureBuilder(
-          future: _initialization,
-          builder: (context, snapshot) {
-            print(snapshot.connectionState);
-            if (snapshot.hasError) {
-              throw FirebaseException(
-                  plugin: "firebase_core", message: "${snapshot.error}");
-            }
-            if (snapshot.connectionState == ConnectionState.done) {
-              return MaterialApp(
-                home: HomePage(),
-                theme: themeData,
-                routes: {
-                  ScanPage.routeName: (_) => ScanPage(),
-                  WalletPage.routeName: (_) =>
-                      WalletPage(walletStorage: WalletStorage()),
-                  // RegisterPage.routeName: (_) => RegisterPage(),
-                },
+    return ChangeNotifierProvider(
+      create: (context) => BlockChain(),
+      child: MaterialApp(
+        home: FutureBuilder(
+            future: _initialization,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                throw FirebaseException(
+                    plugin: "firebase_core", message: "${snapshot.error}");
+              }
+              if (snapshot.connectionState == ConnectionState.done) {
+                return MaterialApp(
+                  home: HomePage(),
+                  theme: themeData,
+                  routes: {
+                    ScanPage.routeName: (_) => ScanPage(),
+                    WalletPage.routeName: (_) =>
+                        WalletPage(walletStorage: WalletStorage()),
+                    // RegisterPage.routeName: (_) => RegisterPage(),
+                  },
+                );
+              }
+              return const Center(
+                child: CircularProgressIndicator(),
               );
-            }
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }),
+            }),
+      ),
     );
   }
 }

@@ -1,5 +1,8 @@
+import 'package:admin/providers/blockchain.dart';
 import 'package:admin/utils/wallet_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:web3dart/web3dart.dart';
 
 class WalletPage extends StatefulWidget {
   const WalletPage({Key? key, required this.walletStorage}) : super(key: key);
@@ -14,13 +17,24 @@ class _WalletPageState extends State<WalletPage> {
   List<Card> _wallets = [];
   late TextEditingController _pw_controller;
   late TextEditingController _name_controller;
+  bool _init = false;
 
   @override
   void initState() {
     super.initState();
     _pw_controller = TextEditingController();
     _name_controller = TextEditingController();
-    fetchWalletTiles();
+    // fetchWalletTiles();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_init) {
+      fetchWalletTiles();
+      _init = true;
+    }
+    // TODO: implement didChangeDependencies
   }
 
   void fetchWalletTiles() {
@@ -29,13 +43,16 @@ class _WalletPageState extends State<WalletPage> {
         _wallets = wallets.map((file) {
           final filename = file.uri.pathSegments.last;
           final title = filename.split('{').first;
-          final address_re = RegExp(r'0x[a-fA-F0-9]{40}');
-          final address = address_re.firstMatch(filename);
+          final addressRe = RegExp(r'0x[a-fA-F0-9]{40}');
+          final address = addressRe.firstMatch(filename)![0];
+          final blockchain = Provider.of<BlockChain>(context);
+          blockchain.add(address!);
+          // final balance = Web3Client(url, httpClient)
           return Card(
             child: ListTile(
               // onTap: (() => Navigator.pushNamed(context, routeName),
               title: Text(title),
-              subtitle: Text('${address?[0]}'),
+              subtitle: Text('${blockchain.balances[address]}'),
             ),
           );
         }).toList();
