@@ -1,6 +1,6 @@
 // import 'package:admin/routes/register.dart';
 import 'package:admin/providers/blockchain.dart';
-import 'package:admin/routes/wallet.dart';
+import 'package:admin/routes/wallets_list.dart';
 import 'package:admin/utils/wallet_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -49,8 +49,8 @@ class _VoterAdminAppState extends State<VoterAdminApp> {
                   theme: themeData,
                   routes: {
                     ScanPage.routeName: (_) => ScanPage(),
-                    WalletPage.routeName: (_) =>
-                        WalletPage(walletStorage: WalletStorage()),
+                    WalletsListPage.routeName: (_) =>
+                        WalletsListPage(walletStorage: WalletStorage()),
                     // RegisterPage.routeName: (_) => RegisterPage(),
                   },
                 );

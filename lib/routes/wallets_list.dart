@@ -1,22 +1,25 @@
 import 'package:admin/providers/blockchain.dart';
+import 'package:admin/routes/wallet_home.dart';
 import 'package:admin/utils/wallet_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:web3dart/web3dart.dart';
 
-class WalletPage extends StatefulWidget {
-  const WalletPage({Key? key, required this.walletStorage}) : super(key: key);
+class WalletsListPage extends StatefulWidget {
+  const WalletsListPage({Key? key, required this.walletStorage})
+      : super(key: key);
 
   final WalletStorage walletStorage;
-  static const routeName = '/wallet';
+  static const routeName = '/walletsList';
   @override
-  State<WalletPage> createState() => _WalletPageState();
+  State<WalletsListPage> createState() => _WalletsListPageState();
 }
 
-class _WalletPageState extends State<WalletPage> {
+class _WalletsListPageState extends State<WalletsListPage> {
   List<Card> _wallets = [];
   late TextEditingController _pw_controller;
   late TextEditingController _name_controller;
+  final pwUnlockController = TextEditingController();
   bool _init = false;
 
   @override
@@ -50,7 +53,74 @@ class _WalletPageState extends State<WalletPage> {
           // final balance = Web3Client(url, httpClient)
           return Card(
             child: ListTile(
-                // onTap: (() => Navigator.pushNamed(context, routeName),
+                onTap: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (BuildContext context) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).viewInsets.bottom),
+                        child: Container(
+                          height: 200,
+                          color: Theme.of(context)
+                              .bottomSheetTheme
+                              .backgroundColor,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  child: TextField(
+                                    autofocus: true,
+                                    controller: pwUnlockController,
+                                    onSubmitted: (password) async {
+                                      final walletString =
+                                          await file.readAsString();
+                                      try {
+                                        final wallet = Wallet.fromJson(
+                                            walletString, password);
+                                        pwUnlockController.clear();
+                                        Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    WalletHome(
+                                                      name: title,
+                                                      wallet: wallet,
+                                                    )));
+                                      } on ArgumentError {
+                                        showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              return const AlertDialog(
+                                                title: Text("Wrong Password."),
+                                              );
+                                            });
+                                      }
+                                    },
+                                    decoration: const InputDecoration(
+                                        hintText: "Enter Wallet Password"),
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  child: const Text('Cancel'),
+                                  onPressed: () {
+                                    pwUnlockController.clear();
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
                 title: Text(title),
                 subtitle: Consumer<BlockChain>(
                   builder: (context, value, child) {
@@ -75,6 +145,7 @@ class _WalletPageState extends State<WalletPage> {
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+    pwUnlockController.dispose();
     _pw_controller.dispose();
     _name_controller.dispose();
   }
@@ -118,6 +189,7 @@ class _WalletPageState extends State<WalletPage> {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: TextField(
+                                  // obscureText: true,
                                   autofocus: true,
                                   textInputAction: TextInputAction.next,
                                   controller: _name_controller,
