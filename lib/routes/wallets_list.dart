@@ -90,6 +90,7 @@ class _WalletsListPageState extends State<WalletsListPage> {
                                                 builder: (context) =>
                                                     WalletHome(
                                                       name: title,
+                                                      address: address,
                                                       wallet: wallet,
                                                     )));
                                       } on ArgumentError {
