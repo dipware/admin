@@ -24,6 +24,10 @@ class BlockChain with ChangeNotifier {
   Map get balances {
     return {..._balances};
   }
+
+  Web3Client get client {
+    return _ethClient;
+  }
   // BlockChain() {
 
   //   _ethClient.addedBlocks().listen((hash) async {
