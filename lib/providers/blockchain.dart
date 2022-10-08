@@ -7,9 +7,13 @@ class BlockChain with ChangeNotifier {
   final _ethClient = Web3Client(dotenv.env['ETH_CLIENT']!, Client());
   final _balances = {};
   final _listeners = {};
+
   void add(String address) {
+    if (_balances[address] != null) {
+      print("ADD RETURN");
+      return;
+    }
     final ethAddress = EthereumAddress.fromHex(address);
-    _balances[address] = null;
     final listener = _ethClient.addedBlocks().listen((hash) async {
       final newBalance = await _ethClient.getBalance(ethAddress);
       print(newBalance);
