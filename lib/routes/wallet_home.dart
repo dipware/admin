@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:web3dart/credentials.dart';
+import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart';
 
 class WalletHome extends StatefulWidget {
@@ -28,20 +29,17 @@ class _WalletHomeState extends State<WalletHome> {
     super.initState();
     rootBundle.loadString('assets/democracy.json').then((json) async {
       final String obj = jsonDecode(json)['object'];
-      final data = Uint8List.fromList(obj.codeUnits);
+      final data = intToBytes(hexToInt(obj));
       final blockchain = Provider.of<BlockChain>(context, listen: false);
       final tx = await blockchain.client.sendTransaction(
         widget.wallet.privateKey,
         Transaction(
           data: data,
-          gasPrice: EtherAmount.inWei(BigInt.from(1000)),
-          maxGas: 1000000,
-          value: EtherAmount.fromUnitAndValue(EtherUnit.gwei, 1),
+          // maxGas: 840241,
         ),
         chainId: 5,
       );
       print(tx);
-      // Transaction(data: )
     });
   }
 
