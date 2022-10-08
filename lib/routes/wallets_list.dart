@@ -146,6 +146,8 @@ class _WalletsListPageState extends State<WalletsListPage> {
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+    final blockchain = Provider.of<BlockChain>(context, listen: false);
+
     pwUnlockController.dispose();
     _pw_controller.dispose();
     _name_controller.dispose();
