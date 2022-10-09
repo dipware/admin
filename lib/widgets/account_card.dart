@@ -14,9 +14,10 @@ class AccountCard extends StatefulWidget {
   State<AccountCard> createState() => _AccountCardState();
 }
 
+const _units = EtherUnit.values;
+
 class _AccountCardState extends State<AccountCard> {
-  final _units = EtherUnit.values;
-  int _unitIndex = 0;
+  EtherUnit _dropdownUnit = _units.first;
   @override
   Widget build(BuildContext context) {
     final address = widget.address;
@@ -37,7 +38,7 @@ class _AccountCardState extends State<AccountCard> {
                 Expanded(
                   child: Text(
                     address,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    // style: Theme.of(context).textTheme.bodyLarge,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -45,10 +46,11 @@ class _AccountCardState extends State<AccountCard> {
             ),
             Divider(color: Theme.of(context).dividerColor),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              // crossAxisAlignment: CrossAxisAlignment.end,
+              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Text(
-                  'Address: ',
+                  'Balance: ',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Expanded(
@@ -60,16 +62,21 @@ class _AccountCardState extends State<AccountCard> {
                         child: CircularProgressIndicator(),
                       );
                     }
-                    final gwei = ether.getValueInUnit(EtherUnit.wei);
+                    final balance = ether.getValueInUnit(_dropdownUnit);
                     return Text(
-                      "gwei ${EtherUnit.gwei.name}",
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      "$balance",
+                      // style: Theme.of(context).textTheme.bodyLarge,
                       overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
                     );
                   }),
                 ),
+                SizedBox(
+                  width: 27,
+                ),
                 DropdownButton<EtherUnit>(
-                  value: _units[_unitIndex],
+                  alignment: Alignment.bottomCenter,
+                  value: _dropdownUnit,
                   items: _units
                       .map<DropdownMenuItem<EtherUnit>>((EtherUnit value) {
                     return DropdownMenuItem<EtherUnit>(
@@ -78,6 +85,9 @@ class _AccountCardState extends State<AccountCard> {
                     );
                   }).toList(),
                   onChanged: (value) {
+                    setState(() {
+                      _dropdownUnit = value!;
+                    });
                     // _units.
                   },
                 )
