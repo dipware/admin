@@ -1,4 +1,5 @@
 import 'package:admin/models/ballot.dart';
+import 'package:admin/models/question.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -12,22 +13,22 @@ class CreateBallotForm extends StatefulWidget {
 }
 
 class _CreateBallotFormState extends State<CreateBallotForm> {
-  final ballot = Ballot();
-  String _question = '';
+  Ballot _ballot = Ballot();
   final _formKey = GlobalKey<FormState>();
   List<TextFormField> _choiceFields(int numberofChoices) {
     final List<TextFormField> choiceFields = [];
     for (var i = 1; i <= numberofChoices; i++) {
       choiceFields.add(TextFormField(
-        onSaved: (value) {},
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter some text';
+          }
+          return null;
+        },
+        onSaved: (value) {
+          _ballot.questions[0].addChoice = value!;
+        },
         decoration: InputDecoration(hintText: 'Choice $i'),
-        onEditingComplete: i == numberofChoices
-            ? () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                }
-              }
-            : null,
       ));
     }
     return choiceFields;
@@ -62,13 +63,13 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                     }
                     return null;
                   },
-                  onFieldSubmitted: (value) {
+                  onSaved: (value) {
                     if (_formKey.currentState!.validate()) {
-                      _question = value;
+                      _ballot.addQuestion = Question(value!);
                     }
                   },
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 11,
                 ),
                 Row(
@@ -96,7 +97,79 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                     ),
                   ],
                 ),
-                ...choiceFields
+                ...choiceFields,
+                const SizedBox(
+                  height: 11,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _formKey.currentState!.reset();
+                        // New ballot?
+                      },
+                      icon: Icon(Icons.cancel_outlined),
+                      label: Text('Cancel'),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+                          await showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                      content: SingleChildScrollView(
+                                    child: Center(
+                                      child: Column(
+                                        children: [
+                                          ..._ballot.questions
+                                              .map((e) => Column(children: [
+                                                    Row(
+                                                      children: [
+                                                        Icon(Icons
+                                                            .question_mark),
+                                                        SizedBox(
+                                                          width: 11,
+                                                        ),
+                                                        Expanded(
+                                                            child: Text(
+                                                                '${_ballot.questions.indexOf(e) + 1}. ${e.text}')),
+                                                      ],
+                                                    ),
+                                                    Divider(),
+                                                    ...e.choices
+                                                        .map((e) => Row(
+                                                              children: [
+                                                                Icon(Icons
+                                                                    .circle_outlined),
+                                                                SizedBox(
+                                                                  width: 11,
+                                                                ),
+                                                                Expanded(
+                                                                    child: Text(
+                                                                        e)),
+                                                              ],
+                                                            ))
+                                                        .toList(),
+                                                  ]))
+                                              .toList(),
+                                          Divider(
+                                            height: 7,
+                                            thickness: 4,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )));
+                          _ballot = Ballot();
+                        }
+                      },
+                      icon: Icon(Icons.check),
+                      label: Text('OK'),
+                    )
+                  ],
+                )
               ],
             ),
           ),
