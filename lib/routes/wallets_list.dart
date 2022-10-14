@@ -8,14 +8,14 @@ import 'package:web3dart/web3dart.dart';
 class WalletsListPage extends StatefulWidget {
   const WalletsListPage({Key? key, required this.walletStorage})
       : super(key: key);
-
   final WalletStorage walletStorage;
   static const routeName = '/walletsList';
   @override
   State<WalletsListPage> createState() => _WalletsListPageState();
 }
 
-class _WalletsListPageState extends State<WalletsListPage> {
+class _WalletsListPageState
+    extends State<WalletsListPage> /*with WidgetsBindingObserver*/ {
   List<Card> _wallets = [];
   late TextEditingController _pw_controller;
   late TextEditingController _name_controller;
@@ -25,6 +25,7 @@ class _WalletsListPageState extends State<WalletsListPage> {
   @override
   void initState() {
     super.initState();
+    // WidgetsBinding.instance.addObserver(this);
     _pw_controller = TextEditingController();
     _name_controller = TextEditingController();
     // fetchWalletTiles();
@@ -37,9 +38,10 @@ class _WalletsListPageState extends State<WalletsListPage> {
       fetchWalletTiles();
       _init = true;
     }
-    // TODO: implement didChangeDependencies
   }
 
+  // @override
+  // void didChangeAppLifecycleState()
   void fetchWalletTiles() {
     widget.walletStorage.wallets.then((wallets) {
       setState(() {
