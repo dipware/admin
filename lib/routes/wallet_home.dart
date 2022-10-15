@@ -24,20 +24,6 @@ class _WalletHomeState extends State<WalletHome> {
   @override
   void initState() {
     super.initState();
-    // rootBundle.loadString('assets/democracy.json').then((json) async {
-    //   final String obj = jsonDecode(json)['object'];
-    //   final data = intToBytes(hexToInt(obj));
-    //   final blockchain = Provider.of<BlockChain>(context, listen: false);
-    //   final tx = await blockchain.client.sendTransaction(
-    //     widget.wallet.privateKey,
-    //     Transaction(
-    //       data: data,
-    //       // maxGas: 840241,
-    //     ),
-    //     chainId: 5,
-    //   );
-    //   print(tx);
-    // });
   }
 
   @override
@@ -45,7 +31,9 @@ class _WalletHomeState extends State<WalletHome> {
     final address = widget.address;
     List<Widget> _widgetOptions = <Widget>[
       AccountCard(address: address),
-      const CreateBallotForm(),
+      CreateBallotForm(
+        wallet: widget.wallet,
+      ),
       History(address: address),
     ];
     return Scaffold(

@@ -1,13 +1,18 @@
+import 'dart:convert';
+
 import 'package:admin/models/ballot.dart';
 import 'package:admin/models/question.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:web3dart/crypto.dart';
+import 'package:web3dart/web3dart.dart';
+
+import '../providers/blockchain.dart';
 
 class CreateBallotForm extends StatefulWidget {
-  const CreateBallotForm({Key? key}) : super(key: key);
-
+  const CreateBallotForm({Key? key, required this.wallet}) : super(key: key);
+  final Wallet wallet;
   @override
   State<CreateBallotForm> createState() => _CreateBallotFormState();
 }
@@ -83,8 +88,7 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
           return null;
         },
         onSaved: (choice) {
-          print(_ballot.questions[qNumber]);
-          // _ballot.questions[qNumber + 1]!.choices[i + 1] = choice!;
+          _ballot.questions[qNumber]!.choices[i] = choice!;
         },
         decoration: InputDecoration(hintText: 'Choice $i'),
       ));
@@ -92,7 +96,7 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
     return choiceFields;
   }
 
-  final Map<int, int> _qAndA = {1: 1};
+  final Map<int, int> _qAndA = {1: 2};
   // int _numQuestions = 1;
   // int _numChoices = 1;
   @override
@@ -124,7 +128,6 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                         width: 50,
                         child: DropdownButtonFormField<int>(
                           value: 1,
-                          // value: _numQuestions,
                           items: [1, 2, 3, 4, 5]
                               .map((e) => DropdownMenuItem<int>(
                                   value: e, child: Text(e.toString())))
@@ -133,7 +136,7 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                             setState(() {
                               for (int i = 1; i <= value!; i++) {
                                 if (!_qAndA.containsKey(i)) {
-                                  _qAndA[i] = 1;
+                                  _qAndA[i] = 2;
                                 }
                               }
                               for (int i = value + 1; i <= 5; i++) {
@@ -141,7 +144,6 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                   _qAndA.remove(i);
                                 }
                               }
-                              // _numQuestions = value!;
                             });
                           },
                         ),
@@ -170,7 +172,38 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                             await showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(
-                                        content: SingleChildScrollView(
+                                    actionsAlignment: MainAxisAlignment.center,
+                                    actions: [
+                                      ElevatedButton.icon(
+                                          onPressed: () {
+                                            rootBundle
+                                                .loadString(
+                                                    'assets/democracy.json')
+                                                .then((json) async {
+                                              final String obj =
+                                                  jsonDecode(json)['object'];
+                                              final data =
+                                                  intToBytes(hexToInt(obj));
+                                              final blockchain =
+                                                  Provider.of<BlockChain>(
+                                                      context,
+                                                      listen: false);
+                                              final tx = await blockchain.client
+                                                  .sendTransaction(
+                                                widget.wallet.privateKey,
+                                                Transaction(
+                                                  data: data,
+                                                  // maxGas: 840241,
+                                                ),
+                                                chainId: 5,
+                                              );
+                                              print(tx);
+                                            });
+                                          },
+                                          icon: Icon(Icons.thumb_up_sharp),
+                                          label: Text('Confirm'))
+                                    ],
+                                    content: SingleChildScrollView(
                                       child: Center(
                                         child: Column(
                                           children: [
@@ -178,41 +211,76 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                                 .map((i) => Column(children: [
                                                       Row(
                                                         children: [
-                                                          const Icon(Icons
-                                                              .question_mark),
+                                                          Icon(
+                                                            Icons.question_mark,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .background,
+                                                          ),
                                                           const SizedBox(
                                                             width: 11,
                                                           ),
                                                           Expanded(
                                                             child: Text(
-                                                                '${i + 1}. ${_ballot.questions[i]!.text}'),
+                                                                '${_ballot.questions[i]!.text}',
+                                                                style: Theme.of(
+                                                                        context)
+                                                                    .textTheme
+                                                                    .titleLarge),
                                                           ),
                                                         ],
                                                       ),
                                                       Divider(),
                                                       ..._ballot.questions[i]!
                                                           .choices.keys
-                                                          .map((j) => Row(
+                                                          .map((j) => Column(
                                                                 children: [
-                                                                  const Icon(Icons
-                                                                      .circle_outlined),
-                                                                  const SizedBox(
-                                                                    width: 11,
+                                                                  Row(
+                                                                    children: [
+                                                                      Icon(
+                                                                        Icons
+                                                                            .circle_outlined,
+                                                                        size:
+                                                                            14,
+                                                                        color: Theme.of(context)
+                                                                            .colorScheme
+                                                                            .background,
+                                                                      ),
+                                                                      const SizedBox(
+                                                                        width:
+                                                                            11,
+                                                                      ),
+                                                                      Expanded(
+                                                                          child: Text(_ballot
+                                                                              .questions[i]!
+                                                                              .choices[j]!)),
+                                                                    ],
                                                                   ),
-                                                                  Expanded(
-                                                                      child: Text(_ballot
+                                                                  if (j !=
+                                                                      _ballot
                                                                           .questions[
                                                                               i]!
-                                                                          .choices[j]!)),
+                                                                          .choices
+                                                                          .length)
+                                                                    SizedBox(
+                                                                      height: 8,
+                                                                    )
                                                                 ],
                                                               ))
                                                           .toList(),
+                                                      SizedBox(
+                                                        height: 11,
+                                                      ),
+                                                      const Divider(
+                                                        height: 7,
+                                                        thickness: 4,
+                                                      ),
+                                                      SizedBox(
+                                                        height: 11,
+                                                      ),
                                                     ]))
                                                 .toList(),
-                                            const Divider(
-                                              height: 7,
-                                              thickness: 4,
-                                            ),
                                           ],
                                         ),
                                       ),

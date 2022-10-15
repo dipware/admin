@@ -63,7 +63,7 @@ class _HistoryState extends State<History> {
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.ballot),
+                    leading: const Icon(Icons.how_to_vote),
                     title: Text(_contracts[index]['date']!),
                     trailing: Text(
                       _contracts[index]['time']!,
