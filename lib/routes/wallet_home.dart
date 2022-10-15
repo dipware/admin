@@ -1,7 +1,11 @@
+import 'dart:async';
+
+import 'package:admin/providers/blockchain.dart';
 import 'package:admin/widgets/account_card.dart';
 import 'package:admin/widgets/create_ballot_form.dart';
 import 'package:admin/widgets/history.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:web3dart/credentials.dart';
 import 'package:web3dart/web3dart.dart';
 
@@ -21,9 +25,18 @@ class WalletHome extends StatefulWidget {
 
 class _WalletHomeState extends State<WalletHome> {
   int _selectedIndex = 1;
+  late StreamSubscription<String> _historyListener;
   @override
   void initState() {
     super.initState();
+    _historyListener = Provider.of<BlockChain>(context, listen: false)
+        .addContracts(widget.address);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _historyListener.cancel();
   }
 
   @override
@@ -34,7 +47,7 @@ class _WalletHomeState extends State<WalletHome> {
       CreateBallotForm(
         wallet: widget.wallet,
       ),
-      History(address: address),
+      const History(),
     ];
     return Scaffold(
       appBar: AppBar(
