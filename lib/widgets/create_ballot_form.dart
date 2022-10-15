@@ -83,7 +83,8 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
           return null;
         },
         onSaved: (choice) {
-          _ballot.questions[qNumber]!.choices[i] = choice!;
+          print(_ballot.questions[qNumber]);
+          // _ballot.questions[qNumber + 1]!.choices[i + 1] = choice!;
         },
         decoration: InputDecoration(hintText: 'Choice $i'),
       ));
