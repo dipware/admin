@@ -1,5 +1,6 @@
 import 'package:admin/widgets/account_card.dart';
 import 'package:admin/widgets/create_ballot_form.dart';
+import 'package:admin/widgets/history.dart';
 import 'package:flutter/material.dart';
 import 'package:web3dart/credentials.dart';
 import 'package:web3dart/web3dart.dart';
@@ -44,10 +45,8 @@ class _WalletHomeState extends State<WalletHome> {
     final address = widget.address;
     List<Widget> _widgetOptions = <Widget>[
       AccountCard(address: address),
-      CreateBallotForm(),
-      Text(
-        'Index 2: School',
-      ),
+      const CreateBallotForm(),
+      History(address: address),
     ];
     return Scaffold(
       appBar: AppBar(
