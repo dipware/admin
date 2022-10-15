@@ -2,6 +2,7 @@ import 'package:admin/providers/blockchain.dart';
 import 'package:admin/routes/wallet_home.dart';
 import 'package:admin/utils/wallet_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:web3dart/web3dart.dart';
 
@@ -148,7 +149,7 @@ class _WalletsListPageState
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    final blockchain = Provider.of<BlockChain>(context, listen: false);
+    // final blockchain = Provider.of<BlockChain>(context, listen: false);
 
     pwUnlockController.dispose();
     _pw_controller.dispose();
@@ -174,6 +175,11 @@ class _WalletsListPageState
             TextButton(
               style: Theme.of(context).textButtonTheme.style,
               onPressed: () {
+                final focus = FocusNode();
+                final focus2 = FocusNode();
+                final focus3 = FocusNode();
+                final focus4 = FocusNode();
+                final _formKey = GlobalKey<FormState>();
                 showModalBottomSheet<void>(
                   context: context,
                   isScrollControlled: true,
@@ -186,48 +192,122 @@ class _WalletsListPageState
                         color:
                             Theme.of(context).bottomSheetTheme.backgroundColor,
                         child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: TextField(
-                                  // obscureText: true,
-                                  autofocus: true,
-                                  textInputAction: TextInputAction.next,
-                                  controller: _name_controller,
-                                  decoration: const InputDecoration(
-                                      hintText: "Name Your Wallet"),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 11.0),
+                                  child: TextField(
+                                    // obscureText: true,
+                                    autofocus: true,
+                                    textInputAction: TextInputAction.next,
+                                    controller: _name_controller,
+                                    decoration: const InputDecoration(
+                                        hintText: "Name Your Wallet"),
+                                  ),
                                 ),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: TextField(
-                                  controller: _pw_controller,
-                                  onSubmitted: (value) {
-                                    widget.walletStorage.writeWallet(
-                                        _name_controller.text,
-                                        _pw_controller.text);
-                                    fetchWalletTiles();
-                                    _pw_controller.clear();
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 11.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      // onSubmitted: (value) {
+                                      //   widget.walletStorage.writeWallet(
+                                      //       _name_controller.text,
+                                      //       _pw_controller.text);
+                                      //   fetchWalletTiles();
+                                      //   _pw_controller.clear();
+                                      //   // Navigator.pop(context);
+                                      // },
+                                      Container(
+                                        width: 50,
+                                        child: TextFormField(
+                                          focusNode: focus,
+                                          onChanged: (val) {
+                                            if (val != '') focus.nextFocus();
+                                          },
+                                          inputFormatters: [
+                                            LengthLimitingTextInputFormatter(1),
+                                          ],
+                                          obscureText: true,
+                                          obscuringCharacter: '*',
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                              border: OutlineInputBorder()),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 11,
+                                      ),
+                                      Container(
+                                        width: 50,
+                                        child: TextField(
+                                          inputFormatters: [
+                                            LengthLimitingTextInputFormatter(1),
+                                          ],
+                                          onChanged: (val) {
+                                            if (val != '') focus.nextFocus();
+                                          },
+                                          obscureText: true,
+                                          obscuringCharacter: '*',
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                              border: OutlineInputBorder()),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 11,
+                                      ),
+                                      Container(
+                                        width: 50,
+                                        child: TextField(
+                                          onChanged: (val) {
+                                            if (val != '') focus.nextFocus();
+                                          },
+                                          inputFormatters: [
+                                            LengthLimitingTextInputFormatter(1),
+                                          ],
+                                          obscureText: true,
+                                          obscuringCharacter: '*',
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                              border: OutlineInputBorder()),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 11,
+                                      ),
+                                      Container(
+                                        width: 50,
+                                        child: TextField(
+                                          inputFormatters: [
+                                            LengthLimitingTextInputFormatter(1),
+                                          ],
+                                          obscureText: true,
+                                          obscuringCharacter: '*',
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                              border: OutlineInputBorder()),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  child: const Text('Cancel'),
+                                  onPressed: () {
                                     Navigator.pop(context);
+                                    _name_controller.clear();
+                                    _pw_controller.clear();
                                   },
-                                  decoration: const InputDecoration(
-                                      hintText: "Choose A Password"),
                                 ),
-                              ),
-                              ElevatedButton(
-                                child: const Text('Cancel'),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _name_controller.clear();
-                                  _pw_controller.clear();
-                                },
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
