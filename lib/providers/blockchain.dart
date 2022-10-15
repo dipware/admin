@@ -7,6 +7,7 @@ class BlockChain with ChangeNotifier {
   final _ethClient = Web3Client(dotenv.env['ETH_CLIENT']!, Client());
   final _balances = {};
   final _listeners = {};
+  // final _contracts = {};
 
   void add(String address) {
     if (_balances[address] != null) {

@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/blockchain.dart';
 
 class History extends StatefulWidget {
   History({Key? key, required this.address}) : super(key: key);
@@ -15,12 +19,31 @@ class History extends StatefulWidget {
 }
 
 class _HistoryState extends State<History> {
+  bool _init = false;
+  late StreamSubscription<String> _listener;
   final url = 'api-goerli.etherscan.io';
   List<String> creationAddrs = [];
   List<Map<String, String>> _contracts = [];
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_init) {
+      _listener =
+          Provider.of<BlockChain>(context).client.addedBlocks().listen((_) {
+        _fetchTxs();
+      });
+      _init = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _listener.cancel();
+  }
+
+  void _fetchTxs() {
     final uri = Uri.https(url, '/api', {
       'module': 'account',
       'action': 'txlist',
@@ -54,26 +77,33 @@ class _HistoryState extends State<History> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Center(
-      child: ListView.builder(
-        reverse: true,
-        itemCount: _contracts.length,
-        itemBuilder: ((context, index) => Card(
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.how_to_vote),
-                    title: Text(_contracts[index]['date']!),
-                    trailing: Text(
-                      _contracts[index]['time']!,
+      child: _contracts.isEmpty
+          ? Text('Waiting for a block....')
+          : ListView.builder(
+              reverse: true,
+              itemCount: _contracts.length,
+              itemBuilder: ((context, index) => Card(
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.how_to_vote),
+                          title: Text(_contracts[index]['date']!),
+                          trailing: Text(
+                            _contracts[index]['time']!,
+                          ),
+                        ),
+                        Divider()
+                      ],
                     ),
-                  ),
-                  Divider()
-                ],
-              ),
-            )),
-      ),
+                  )),
+            ),
     );
   }
 }
