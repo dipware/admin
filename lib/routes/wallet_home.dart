@@ -9,16 +9,24 @@ import 'package:provider/provider.dart';
 import 'package:web3dart/credentials.dart';
 import 'package:web3dart/web3dart.dart';
 
-class WalletHome extends StatefulWidget {
-  const WalletHome(
-      {Key? key,
-      required this.name,
-      required this.address,
-      required this.wallet})
-      : super(key: key);
-  final Wallet wallet;
+class WalletArguments {
   final String name;
   final String address;
+  final Wallet wallet;
+  WalletArguments(this.name, this.address, this.wallet);
+}
+
+class WalletHome extends StatefulWidget {
+  static const routeName = '/walletHome';
+  const WalletHome({
+    Key? key,
+    // required this.name,
+    // required this.address,
+    // required this.wallet
+  }) : super(key: key);
+  // final Wallet wallet;
+  // final String name;
+  // final String address;
   @override
   State<WalletHome> createState() => _WalletHomeState();
 }
@@ -26,11 +34,12 @@ class WalletHome extends StatefulWidget {
 class _WalletHomeState extends State<WalletHome> {
   int _selectedIndex = 1;
   late StreamSubscription<String> _historyListener;
+  bool _init = false;
   @override
   void initState() {
     super.initState();
-    _historyListener = Provider.of<BlockChain>(context, listen: false)
-        .addContracts(widget.address);
+    // _historyListener = Provider.of<BlockChain>(context, listen: false)
+    //     .addContracts(_args.address);
   }
 
   @override
@@ -41,17 +50,24 @@ class _WalletHomeState extends State<WalletHome> {
 
   @override
   Widget build(BuildContext context) {
-    final address = widget.address;
+    final _args = ModalRoute.of(context)!.settings.arguments as WalletArguments;
+    if (!_init) {
+      _historyListener = Provider.of<BlockChain>(context, listen: false)
+          .addContracts(_args.address);
+      _init = true;
+    }
+    final address = _args.address;
+    print(address);
     List<Widget> _widgetOptions = <Widget>[
       AccountCard(address: address),
       CreateBallotForm(
-        wallet: widget.wallet,
+        wallet: _args.wallet,
       ),
       const History(),
     ];
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.name),
+        title: Text(_args.name),
       ),
       backgroundColor: Theme.of(context).backgroundColor,
       body: _widgetOptions.elementAt(_selectedIndex),

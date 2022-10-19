@@ -14,10 +14,9 @@ class ScanPage extends StatefulWidget {
 }
 
 class _ScanPageState extends State<ScanPage> {
-  Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  List<String> _voterKeys = [];
+  final List<String> _voterKeys = [];
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -35,73 +34,30 @@ class _ScanPageState extends State<ScanPage> {
     return Scaffold(
       body: Column(
         children: <Widget>[
-          Expanded(flex: 2, child: _buildQrView(context)),
+          Expanded(flex: 3, child: _buildQrView(context)),
           Expanded(
             flex: 1,
-            child: FittedBox(
-              fit: BoxFit.contain,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              color: Theme.of(context).backgroundColor,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   if (_voterKeys.isNotEmpty)
-                    Text("Registered Voters: ${_voterKeys.length}")
+                    Text(
+                      "Number Registered Voters: ${_voterKeys.length}",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    )
                   else
-                    Text('Scan a code'),
-                  if (result != null)
-                    Text(result!.code!)
-                  else
-                    Text('Scan a code'),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.toggleFlash();
-                              setState(() {});
-                            },
-                            child: FutureBuilder(
-                              future: controller?.getFlashStatus(),
-                              builder: (context, snapshot) {
-                                return Text('Flash: ${snapshot.data}');
-                              },
-                            )),
-                      ),
-                      Container(
-                        margin: EdgeInsets.all(8),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await controller?.flipCamera();
-                            setState(() {});
-                          },
-                          child: FutureBuilder(
-                            future: controller?.getCameraInfo(),
-                            builder: (context, snapshot) {
-                              if (snapshot.data != null) {
-                                return Text(
-                                    'Camera facing ${describeEnum(snapshot.data!)}');
-                              } else {
-                                return Text('loading');
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                RegisterPage(voters: _voterKeys),
-                          ),
-                        );
-                      },
-                      child: const Text("Register"))
+                    Text(
+                      "Scan a voter's QR code to register them.",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.check),
+                      label: const Text("Begin Vote!"))
                 ],
               ),
             ),
@@ -140,7 +96,7 @@ class _ScanPageState extends State<ScanPage> {
       (scanData) {
         // print(scanData.code);
         setState(() {
-          result = scanData;
+          // result = scanData;
           if (!_voterKeys.contains(scanData.code)) {
             _voterKeys.add(scanData.code!);
           }
@@ -153,7 +109,7 @@ class _ScanPageState extends State<ScanPage> {
     log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
     if (!p) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('no Permission')),
+        const SnackBar(content: Text('You must allow camera permission.')),
       );
     }
   }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:admin/models/ballot.dart';
 import 'package:admin/models/question.dart';
+import 'package:admin/routes/scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -197,11 +198,17 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                                 ),
                                                 chainId: 5,
                                               );
+
+                                              Navigator.of(context)
+                                                  .pushReplacement(
+                                                      MaterialPageRoute(
+                                                          builder: (_) =>
+                                                              ScanPage()));
                                               print(tx);
                                             });
                                           },
-                                          icon: Icon(Icons.thumb_up_sharp),
-                                          label: Text('Confirm'))
+                                          icon: const Icon(Icons.check),
+                                          label: const Text('Confirm'))
                                     ],
                                     content: SingleChildScrollView(
                                       child: Center(

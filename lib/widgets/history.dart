@@ -49,7 +49,7 @@ class _HistoryState extends State<History> {
     final contracts = Provider.of<BlockChain>(context).contracts;
     return Center(
       child: contracts.isEmpty
-          ? Text('Waiting for a block....')
+          ? const Text('....')
           : ListView.builder(
               reverse: true,
               itemCount: contracts.length,
@@ -63,7 +63,7 @@ class _HistoryState extends State<History> {
                             contracts[index]['time']!,
                           ),
                         ),
-                        Divider()
+                        const Divider()
                       ],
                     ),
                   )),
