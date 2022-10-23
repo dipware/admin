@@ -57,13 +57,14 @@ class _WalletHomeState extends State<WalletHome> {
       _init = true;
     }
     final address = _args.address;
-    print(address);
     List<Widget> _widgetOptions = <Widget>[
       AccountCard(address: address),
       CreateBallotForm(
         wallet: _args.wallet,
       ),
-      const History(),
+      History(
+        wallet: _args.wallet,
+      ),
     ];
     return Scaffold(
       appBar: AppBar(

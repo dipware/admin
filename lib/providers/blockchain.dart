@@ -73,6 +73,7 @@ class BlockChain with ChangeNotifier {
         final time = DateFormat.jm().format(dateTime);
         contracts.add({
           'address': tx['contractAddress'],
+          'tx': tx['hash'],
           'date': date,
           'time': time,
         });

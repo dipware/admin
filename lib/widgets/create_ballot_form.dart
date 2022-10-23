@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:admin/models/ballot.dart';
 import 'package:admin/models/question.dart';
+import 'package:admin/routes/contract_home.dart';
 import 'package:admin/routes/scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +28,7 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
       widgets.add(TextFormField(
         minLines: 1,
         maxLines: 3,
+        initialValue: 'Debug Question',
         decoration: InputDecoration(
           hintText: "Question $i",
           icon: const Icon(Icons.question_mark),
@@ -82,6 +84,7 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
     final List<TextFormField> choiceFields = [];
     for (var i = 1; i <= numberofChoices; i++) {
       choiceFields.add(TextFormField(
+        initialValue: 'Debug Choice $i',
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Choice text is required.';
@@ -199,12 +202,21 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                                 chainId: 5,
                                               );
 
-                                              Navigator.of(context)
-                                                  .pushReplacement(
-                                                      MaterialPageRoute(
-                                                          builder: (_) =>
-                                                              ScanPage()));
-                                              print(tx);
+                                              final keys = Navigator.of(context)
+                                                  .push(MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          ScanPage()));
+                                              keys.then((value) {
+                                                Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                        builder: (_) =>
+                                                            ContractHome(
+                                                              tx: tx,
+                                                              // voters: value,
+                                                              wallet:
+                                                                  widget.wallet,
+                                                            )));
+                                              });
                                             });
                                           },
                                           icon: const Icon(Icons.check),
@@ -238,7 +250,7 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                                           ),
                                                         ],
                                                       ),
-                                                      Divider(),
+                                                      const Divider(),
                                                       ..._ballot.questions[i]!
                                                           .choices.keys
                                                           .map((j) => Column(
@@ -270,20 +282,20 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                                                               i]!
                                                                           .choices
                                                                           .length)
-                                                                    SizedBox(
+                                                                    const SizedBox(
                                                                       height: 8,
                                                                     )
                                                                 ],
                                                               ))
                                                           .toList(),
-                                                      SizedBox(
+                                                      const SizedBox(
                                                         height: 11,
                                                       ),
                                                       const Divider(
                                                         height: 7,
                                                         thickness: 4,
                                                       ),
-                                                      SizedBox(
+                                                      const SizedBox(
                                                         height: 11,
                                                       ),
                                                     ]))

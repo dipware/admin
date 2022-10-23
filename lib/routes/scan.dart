@@ -1,9 +1,8 @@
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:admin/routes/register.dart';
-import 'package:flutter/foundation.dart';
+import 'package:admin/providers/blockchain.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
@@ -20,17 +19,20 @@ class _ScanPageState extends State<ScanPage> {
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
-  @override
-  void reassemble() {
-    super.reassemble();
-    if (Platform.isAndroid) {
-      controller!.pauseCamera();
-    }
-    controller!.resumeCamera();
-  }
+  // @override
+  // void reassemble() {
+  //   super.reassemble();
+  //   if (Platform.isAndroid) {
+  //     controller!.pauseCamera();
+  //   }
+  //   controller!.resumeCamera();
+  // }
 
   @override
   Widget build(BuildContext context) {
+    print(_voterKeys);
+    final _blockchain = Provider.of<BlockChain>(context);
+    var _contract = _blockchain.contracts.last;
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -54,8 +56,11 @@ class _ScanPageState extends State<ScanPage> {
                       "Scan a voter's QR code to register them.",
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
+                  Text(_blockchain.contracts.first['tx']!),
                   ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).pop(_voterKeys);
+                      },
                       icon: const Icon(Icons.check),
                       label: const Text("Begin Vote!"))
                 ],
@@ -103,6 +108,7 @@ class _ScanPageState extends State<ScanPage> {
         });
       },
     );
+    controller.resumeCamera();
   }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {

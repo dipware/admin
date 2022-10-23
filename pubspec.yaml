@@ -41,6 +41,7 @@ dependencies:
   path_provider: ^2.0.11
   intl: ^0.17.0 #date formatting
   url_launcher: ^6.1.6
+  qr_flutter: ^4.0.0
 
 dev_dependencies:
   flutter_lints: ^1.0.0

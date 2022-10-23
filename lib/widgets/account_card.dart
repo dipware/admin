@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -21,6 +23,7 @@ class _AccountCardState extends State<AccountCard> {
   @override
   Widget build(BuildContext context) {
     final address = widget.address;
+    log('Current Address: $address');
     return Center(
       child: Card(
         child: Padding(
@@ -75,7 +78,7 @@ class _AccountCardState extends State<AccountCard> {
                       );
                     }),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 27,
                   ),
                   DropdownButton<EtherUnit>(
