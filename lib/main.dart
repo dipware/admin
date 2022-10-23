@@ -1,5 +1,6 @@
 // import 'package:admin/routes/register.dart';
 import 'package:admin/providers/blockchain.dart';
+import 'package:admin/routes/voter_home.dart';
 import 'package:admin/routes/wallet_home.dart';
 import 'package:admin/routes/wallets_list.dart';
 import 'package:admin/utils/wallet_storage.dart';
@@ -16,7 +17,7 @@ import 'firebase_options.dart';
 import 'routes/register.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   runApp(const VoterAdminApp());
 }
@@ -29,61 +30,25 @@ class VoterAdminApp extends StatefulWidget {
 }
 
 class _VoterAdminAppState extends State<VoterAdminApp> {
-  final Future<FirebaseApp> _initialization =
-      Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // final Future<FirebaseApp> _initialization =
+  //     Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => BlockChain(),
-      child: MaterialApp(
-        home: FutureBuilder(
-            future: _initialization,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                throw FirebaseException(
-                    plugin: "firebase_core", message: "${snapshot.error}");
-              }
-              if (snapshot.connectionState == ConnectionState.done) {
-                return MaterialApp(
-                  home: HomePage(),
-                  theme: themeData,
-                  routes: {
-                    ScanPage.routeName: (_) => ScanPage(),
-                    WalletsListPage.routeName: (_) => WalletsListPage(
-                          walletStorage: WalletStorage(),
-                        ),
-                    // WalletHome.routeName: (_) => WalletHome(),
-                    // RegisterPage.routeName: (_) => RegisterPage(),
-                  },
-                );
-              }
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }),
-      ),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Voter Administrator"),
-      ),
-      body: const Center(
-        child: Text("hi"),
-      ),
-    );
+        create: (context) => BlockChain(),
+        child: MaterialApp(
+          home: const HomePage(),
+          theme: themeData,
+          routes: {
+            ScanPage.routeName: (_) => ScanPage(),
+            WalletsListPage.routeName: (_) => WalletsListPage(
+                  walletStorage: WalletStorage(),
+                ),
+            VoterHomePage.routeName: (_) => VoterHomePage(),
+            // WalletHome.routeName: (_) => WalletHome(),
+            // RegisterPage.routeName: (_) => RegisterPage(),
+          },
+        ));
   }
 }
