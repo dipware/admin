@@ -12,7 +12,7 @@ final themeData = ThemeData(
       onSurface: Colors.blue.shade800,
       onBackground: Colors.blue.shade800,
       onError: Colors.lightBlue,
-      brightness: Brightness.dark),
+      brightness: Brightness.light),
   textButtonTheme: TextButtonThemeData(
     style: TextButton.styleFrom(
       primary: Colors.white,
@@ -22,6 +22,9 @@ final themeData = ThemeData(
       ),
     ),
   ),
+  scaffoldBackgroundColor: Colors.blue.shade300,
+  // ),scaffoldBackgroundColor: this.,
+  cardColor: Colors.grey[400],
   textTheme: TextTheme(
     bodyText1: TextStyle(color: Colors.blue[900]),
     bodyText2: TextStyle(
