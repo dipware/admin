@@ -11,12 +11,12 @@ import 'package:http/http.dart' as http;
 class BlockChain with ChangeNotifier {
   final _ethClient = Web3Client(dotenv.env['ETH_CLIENT']!, Client());
   final _balances = {};
-  final _listeners = {};
+  final Map<String, StreamSubscription<String>> _listeners = {};
   List<Map<String, String>> _contracts = [];
 
-  void add(String address) async {
+  Future<StreamSubscription<String>> add(String address) async {
     if (_balances[address] != null) {
-      return;
+      throw Exception('Double reference');
     }
     final ethAddress = EthereumAddress.fromHex(address);
     _balances[address] = await _ethClient.getBalance(ethAddress);
@@ -29,7 +29,17 @@ class BlockChain with ChangeNotifier {
       }
     });
     _listeners[address] = listener;
+    return listener;
+    print(listener.runtimeType);
     // make add all return all listeners
+  }
+
+  void disposeAddress(String address) {
+    if (_balances[address] != null) {
+      _balances.remove(address);
+      _listeners[address]!.cancel();
+      _listeners.remove(address);
+    }
   }
 
   StreamSubscription<String> addContracts(String address) {
