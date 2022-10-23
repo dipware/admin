@@ -1,9 +1,7 @@
-import 'dart:io';
-
-import 'package:admin/routes/wallets_list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
+
+import '../routes/voter_home.dart';
+import '../routes/wallets_list.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -19,7 +17,6 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('δημοκρατία'),
       ),
-      backgroundColor: Theme.of(context).colorScheme.background,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -32,99 +29,45 @@ class _HomePageState extends State<HomePage> {
               width: 100,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(7.0),
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                  text: "Welcome to ",
-                  style: Theme.of(context).textTheme.bodyText2,
-                  children: const <TextSpan>[
-                    const TextSpan(
-                      text: "Democracy",
-                      // style: _help
-                      //     ? const TextStyle(
-                      //         shadows: [
-                      //           Shadow(color: Colors.blueGrey, blurRadius: 49)
-                      //         ],
-                      //         fontWeight: FontWeight.bold,
-                      //         decoration: TextDecoration.underline,
-                      //       )
-                      //     : null,
-                    ),
-                    const TextSpan(text: "! If you are "),
-                    const TextSpan(
-                      text: "unfamiliar",
-                      // style: _help
-                      //     ? const TextStyle(
-                      //         shadows: [
-                      //           Shadow(color: Colors.blueGrey, blurRadius: 49)
-                      //         ],
-                      //         fontWeight: FontWeight.bold,
-                      //         decoration: TextDecoration.underline,
-                      //       )
-                      //     : null,
-                    ),
-                    const TextSpan(
-                        text: " with anything, or would just like to "),
-                    const TextSpan(
-                      text: "learn",
-                      // recognizer: TapGestureRecognizer()..onTap = _tapLearn,
-                      // style: _help
-                      //     ? const TextStyle(
-                      //         shadows: [
-                      //           Shadow(color: Colors.blueGrey, blurRadius: 49)
-                      //         ],
-                      //         fontWeight: FontWeight.bold,
-                      //         decoration: TextDecoration.underline,
-                      //       )
-                      //     : null,
-                    ),
-                    const TextSpan(text: " how this app "),
-                    const TextSpan(
-                      text: "works",
-                      // style: _help
-                      //     ? const TextStyle(
-                      //         shadows: [
-                      //           Shadow(color: Colors.blueGrey, blurRadius: 49)
-                      //         ],
-                      //         fontWeight: FontWeight.bold,
-                      //         decoration: TextDecoration.underline,
-                      //       )
-                      //     : null,
-                    ),
-                    const TextSpan(
-                        text:
-                            ", tap the question mark at the top right, then click on the underlined text that appears. If you're all set, tap the button below to begin "),
-                    const TextSpan(
-                      text: "the voting process",
-                      // style: _help
-                      //     ? const TextStyle(
-                      //         shadows: [
-                      //           Shadow(color: Colors.blueGrey, blurRadius: 49)
-                      //         ],
-                      //         fontWeight: FontWeight.bold,
-                      //         decoration: TextDecoration.underline,
-                      //       )
-                      //     : null,
-                    ),
-                    const TextSpan(text: "."),
-                  ]),
-            ),
+          const Padding(
+            padding: EdgeInsets.all(11.0),
+            child: Text('Welcome to Democracy!'),
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 20),
+          const Padding(
+              padding: EdgeInsets.all(11.0),
+              child: Text(
+                'Democracy is a voting app that lets you audit your own vote!',
+                overflow: TextOverflow.visible,
+              )),
+          const Padding(
+              padding: EdgeInsets.all(11.0),
+              child: Text(
+                'Are you a voter or an administrator?',
+                overflow: TextOverflow.visible,
+              )),
+          const SizedBox(
+            height: 20,
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              TextButton(
-                style: Theme.of(context).textButtonTheme.style,
+              ElevatedButton(
                 onPressed: () {
                   Navigator.pushNamed(context, WalletsListPage.routeName);
                 },
                 child: const Text(
-                  "Get Started",
+                  "Administrator",
+                ),
+              ),
+              // const SizedBox(
+              //   width: 70,
+              // ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, VoterHomePage.routeName);
+                },
+                child: const Text(
+                  "Voter",
                 ),
               ),
             ],
