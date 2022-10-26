@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:admin/providers/blockchain.dart';
+import 'package:admin/providers/current_vote.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:web3dart/web3dart.dart';
@@ -24,6 +27,9 @@ class _ContractHomeState extends State<ContractHome> {
     if (contract.isNotEmpty) {
       _init = true;
     }
+    final currentVote = Provider.of<CurrentVoteProvider>(context)
+        .query('getResults2', ["Who is your daddy?", BigInt.one]).then(
+            (value) => log(value.toString()));
     return Scaffold(
       body: Center(
         child: Column(

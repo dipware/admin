@@ -1,3 +1,4 @@
+import 'package:admin/providers/current_vote.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:web3dart/web3dart.dart';
@@ -36,9 +37,14 @@ class _HistoryState extends State<History> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: ((context) => ContractHome(
-                                      tx: contracts[index]['tx']!,
-                                      wallet: widget.wallet,
+                                builder: ((context) =>
+                                    ChangeNotifierProvider<CurrentVoteProvider>(
+                                      create: (_) => CurrentVoteProvider(
+                                          contracts[index]['address']!),
+                                      child: ContractHome(
+                                        tx: contracts[index]['tx']!,
+                                        wallet: widget.wallet,
+                                      ),
                                     )),
                               ),
                             );

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:admin/models/ballot.dart';
 import 'package:admin/models/question.dart';
+import 'package:admin/providers/current_vote.dart';
 import 'package:admin/routes/contract_home.dart';
 import 'package:admin/routes/scan.dart';
 import 'package:flutter/material.dart';
@@ -182,10 +183,8 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                           onPressed: () {
                                             rootBundle
                                                 .loadString(
-                                                    'assets/democracy.json')
-                                                .then((json) async {
-                                              final String obj =
-                                                  jsonDecode(json)['object'];
+                                                    'assets/Democracy.bin')
+                                                .then((obj) async {
                                               final data =
                                                   intToBytes(hexToInt(obj));
                                               final blockchain =
@@ -210,11 +209,18 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                                 Navigator.of(context).push(
                                                     MaterialPageRoute(
                                                         builder: (_) =>
-                                                            ContractHome(
-                                                              tx: tx,
-                                                              // voters: value,
-                                                              wallet:
-                                                                  widget.wallet,
+                                                            Provider<
+                                                                CurrentVoteProvider>(
+                                                              create: (context) =>
+                                                                  CurrentVoteProvider(
+                                                                      value),
+                                                              child:
+                                                                  ContractHome(
+                                                                tx: tx,
+                                                                // voters: value,
+                                                                wallet: widget
+                                                                    .wallet,
+                                                              ),
                                                             )));
                                               });
                                             });
