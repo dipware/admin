@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:admin/models/ballot.dart';
+import 'package:admin/models/contract.dart';
 import 'package:admin/models/question.dart';
 import 'package:admin/providers/current_vote.dart';
-import 'package:admin/routes/contract_home.dart';
+import 'package:admin/routes/admin_home.dart';
 import 'package:admin/routes/scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -180,50 +182,46 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                     actionsAlignment: MainAxisAlignment.center,
                                     actions: [
                                       ElevatedButton.icon(
-                                          onPressed: () {
-                                            rootBundle
-                                                .loadString(
-                                                    'assets/Democracy.bin')
-                                                .then((obj) async {
-                                              final data =
-                                                  intToBytes(hexToInt(obj));
-                                              final blockchain =
-                                                  Provider.of<BlockChain>(
-                                                      context,
-                                                      listen: false);
-                                              final tx = await blockchain.client
-                                                  .sendTransaction(
-                                                widget.wallet.privateKey,
-                                                Transaction(
-                                                  data: data,
-                                                  // maxGas: 840241,
+                                          onPressed: () async {
+                                            // final tx = await contract.deploy(
+                                            //     widget.wallet.privateKey);
+                                            final keys =
+                                                await Navigator.of(context)
+                                                    .push<List<String>>(
+                                                        MaterialPageRoute(
+                                                            builder: (_) =>
+                                                                ScanPage()));
+                                            if (keys == null) {
+                                              return;
+                                            }
+                                            final voters = keys
+                                                .map((e) =>
+                                                    EthereumAddress.fromHex(e))
+                                                .toList();
+                                            log(voters.toString());
+                                            // final currentVote =
+                                            //     CurrentVoteProvider(tx);
+                                            // final ret = await currentVote
+                                            //     .submit('beginVote',
+                                            //         widget.wallet.privateKey, [
+                                            //   question,
+                                            //   choices,
+                                            //   voters,
+                                            // ]);
+                                            // log(ret);
+                                            final tx = await Contract().deploy(
+                                                widget.wallet.privateKey);
+                                            log('Creation tx: $tx');
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (_) => AdminHome(
+                                                  tx: tx,
+                                                  ballot: _ballot,
+                                                  wallet: widget.wallet,
+                                                  voters: voters,
                                                 ),
-                                                chainId: 5,
-                                              );
-
-                                              final keys = Navigator.of(context)
-                                                  .push(MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          ScanPage()));
-                                              keys.then((value) {
-                                                Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                        builder: (_) =>
-                                                            Provider<
-                                                                CurrentVoteProvider>(
-                                                              create: (context) =>
-                                                                  CurrentVoteProvider(
-                                                                      value),
-                                                              child:
-                                                                  ContractHome(
-                                                                tx: tx,
-                                                                // voters: value,
-                                                                wallet: widget
-                                                                    .wallet,
-                                                              ),
-                                                            )));
-                                              });
-                                            });
+                                              ),
+                                            );
                                           },
                                           icon: const Icon(Icons.check),
                                           label: const Text('Confirm'))
@@ -310,6 +308,7 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                         ),
                                       ),
                                     )));
+                            log('Erasing ballot');
                             _ballot = Ballot();
                           }
                         },

@@ -6,11 +6,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
 import 'package:web3dart/web3dart.dart';
 
-class CurrentVoteProvider with ChangeNotifier {
+class CurrentVote {
   final _ethClient = Web3Client(dotenv.env['ETH_CLIENT']!, Client());
-  final Future<String> _abi = rootBundle.loadString("assets/abi.json");
+  final Future<String> _abi = rootBundle.loadString("assets/Democracy.abi");
   final String _contractAddress;
-  CurrentVoteProvider(this._contractAddress);
+  CurrentVote(this._contractAddress);
 
   Future<DeployedContract> get contract async {
     final abi = await _abi;
@@ -33,8 +33,14 @@ class CurrentVoteProvider with ChangeNotifier {
     EthereumAddress address = await credentials.extractAddress();
     final contract = await this.contract;
     final ethFunction = contract.function(functionName);
+    final nonce = await _ethClient.getTransactionCount(address);
+    log('submit: $functionName($args) nonce: $nonce ');
     final tx = Transaction.callContract(
-        contract: contract, function: ethFunction, parameters: args);
+      contract: contract,
+      function: ethFunction,
+      parameters: args,
+      nonce: nonce,
+    );
 
     final estimate = await _ethClient.estimateGas(
       sender: address,
@@ -42,7 +48,11 @@ class CurrentVoteProvider with ChangeNotifier {
       data: tx.data,
     );
     log("Gas Estimate $functionName($args): $estimate");
-    final result = _ethClient.sendTransaction(credentials, tx, chainId: 4);
+    final result = _ethClient.sendTransaction(
+      credentials,
+      tx,
+      chainId: 5,
+    );
     return result;
   }
 }

@@ -30,9 +30,8 @@ class _ScanPageState extends State<ScanPage> {
 
   @override
   Widget build(BuildContext context) {
-    print(_voterKeys);
     final _blockchain = Provider.of<BlockChain>(context);
-    var _contract = _blockchain.contracts.last;
+    // var _contract = _blockchain.contracts.last;
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -48,7 +47,7 @@ class _ScanPageState extends State<ScanPage> {
                 children: <Widget>[
                   if (_voterKeys.isNotEmpty)
                     Text(
-                      "Number Registered Voters: ${_voterKeys.length}",
+                      "Number of registered Voters: ${_voterKeys.length}",
                       style: Theme.of(context).textTheme.bodyLarge,
                     )
                   else
