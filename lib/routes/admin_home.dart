@@ -1,8 +1,7 @@
 import 'dart:developer';
-
 import 'package:admin/providers/blockchain.dart';
 import 'package:admin/providers/current_vote.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
@@ -52,9 +51,9 @@ class _AdminHomeState extends State<AdminHome> {
           }
           log('results: $results');
           log('newResults: $newResults');
-          if (!const ListEquality().equals(results, newResults)) {
+          if (!listEquals(results, newResults)) {
             setState(() {
-              log('newResults == results: ${const ListEquality().equals(results, newResults)}');
+              log('newResults == results: ${listEquals(results, newResults)}');
               results = newResults;
             });
           }

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:admin/providers/blockchain.dart';
 import 'package:admin/routes/wallet_home.dart';
 import 'package:admin/utils/wallet_storage.dart';
@@ -85,6 +87,11 @@ class _WalletsListPageState
                                       try {
                                         final wallet = Wallet.fromJson(
                                             walletString, password);
+                                        // final wallet = Wallet.createNew(
+                                        //     EthPrivateKey.fromHex(
+                                        //         '0x1f219a5bcde0cfa81050fdc718f2208e9c419f5e2cca16d484456cfd5d8f3322'),
+                                        //     '',
+                                        //     Random.secure());
                                         _pwUnlockController.clear();
                                         Navigator.pushReplacementNamed(
                                           context,
@@ -134,7 +141,8 @@ class _WalletsListPageState
                       ],
                     );
                   }
-                  return Text('${value.balances[address]}');
+                  return Text(
+                      'Balance: ${value.balances[address]!.getValueInUnit(EtherUnit.ether)}');
                 },
               ),
             ),

@@ -6,9 +6,9 @@
 
 #include "generated_plugin_registrant.h"
 
-#include <url_launcher_windows/url_launcher_windows.h>
+#include <platform_device_id_windows/platform_device_id_windows_plugin.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
-  UrlLauncherWindowsRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("UrlLauncherWindows"));
+  PlatformDeviceIdWindowsPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("PlatformDeviceIdWindowsPlugin"));
 }

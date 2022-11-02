@@ -30,7 +30,6 @@ class BlockChain with ChangeNotifier {
     });
     _listeners[address] = listener;
     return listener;
-    print(listener.runtimeType);
     // make add all return all listeners
   }
 
@@ -50,7 +49,7 @@ class BlockChain with ChangeNotifier {
   }
 
   void _fetchTxs(String address) async {
-    const url = 'api-goerli.etherscan.io';
+    const url = 'api-sepolia.etherscan.io';
     final esKey = dotenv.env['ETHERSCAN'];
 
     final uri = Uri.https(url, '/api', {
@@ -85,7 +84,7 @@ class BlockChain with ChangeNotifier {
     }
   }
 
-  Map get balances {
+  Map<String, EtherAmount> get balances {
     return {..._balances};
   }
 

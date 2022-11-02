@@ -26,7 +26,9 @@ class Contract {
         // maxGas: 840241,
         nonce: nonce,
       ),
-      chainId: 5,
+      chainId: 11155111,
+      // chainId: 1337,
+      // chainId: 5,
     );
     ethClient.dispose();
     return tx;

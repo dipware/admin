@@ -14,7 +14,11 @@ class WalletStorage {
   Future<File> writeWallet(String name, String password) async {
     final path = await _localWalletPath;
     var random = Random.secure();
-    EthPrivateKey credentials = EthPrivateKey.createRandom(random);
+    // TODO remove when done testing
+    // EthPrivateKey credentials = EthPrivateKey.createRandom(random);
+    final credentials = EthPrivateKey.fromHex(
+        '0x7dbf308e2042e043d0dd229eac765dd610a305888624688674434ca5bf79a11b');
+
     final address = await credentials.extractAddress();
     final walletFile = File('$path/$name{${address.hex}}.json');
     Wallet wallet = Wallet.createNew(credentials, password, random);

@@ -55,7 +55,6 @@ class _ScanPageState extends State<ScanPage> {
                       "Scan a voter's QR code to register them.",
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
-                  Text(_blockchain.contracts.first['tx']!),
                   ElevatedButton.icon(
                       onPressed: () {
                         Navigator.of(context).pop(_voterKeys);
