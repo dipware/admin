@@ -7,12 +7,12 @@ import 'package:http/http.dart';
 import 'package:web3dart/web3dart.dart';
 
 class CurrentVote with ChangeNotifier {
-  final _ethClient = Web3Client(dotenv.env['ETH_CLIENT']!, Client());
   final Future<String> _abi = rootBundle.loadString("assets/Democracy.abi");
   final String _contractAddress;
   String topic = '';
   final List<String> choices = [];
   CurrentVote(this._contractAddress);
+
   void update() {
     query('topic', []).then((value) {
       topic = value[0];
@@ -45,19 +45,23 @@ class CurrentVote with ChangeNotifier {
   }
 
   Future<List<dynamic>> query(String functionName, List<dynamic> args) async {
+    final ethClient = Web3Client(dotenv.env['ETH_CLIENT']!, Client());
+
     final contract = await this.contract;
     final ethFunction = contract.function(functionName);
-    final result = await _ethClient.call(
+    final result = await ethClient.call(
         contract: contract, function: ethFunction, params: args);
+    ethClient.dispose();
     return result;
   }
 
   Future<String> submit(
       String functionName, Credentials credentials, List<dynamic> args) async {
+    final ethClient = Web3Client(dotenv.env['ETH_CLIENT']!, Client());
     EthereumAddress address = await credentials.extractAddress();
     final contract = await this.contract;
     final ethFunction = contract.function(functionName);
-    final nonce = await _ethClient.getTransactionCount(address);
+    final nonce = await ethClient.getTransactionCount(address);
     log('submit: $functionName($args) nonce: $nonce ');
     final tx = Transaction.callContract(
       contract: contract,
@@ -66,18 +70,19 @@ class CurrentVote with ChangeNotifier {
       nonce: nonce,
     );
 
-    final estimate = await _ethClient.estimateGas(
+    final estimate = await ethClient.estimateGas(
       sender: address,
       to: contract.address,
       data: tx.data,
     );
     log("Gas Estimate $functionName($args): $estimate");
-    final result = _ethClient.sendTransaction(
+    final result = ethClient.sendTransaction(
       credentials,
       tx,
       // chainId: 5,
       chainId: 11155111,
     );
+    ethClient.dispose();
     return result;
   }
 }

@@ -59,6 +59,8 @@ class VoterProvider with ChangeNotifier {
         if (tx['value'] != '0') continue;
         final tryVote = CurrentVote(tx['input']);
         final inProgress = await tryVote.query('inProgress', []);
+        print(tryVote.contractAddress);
+        print(currentVote?.contractAddress);
         // final locked = await tryVote.query('locked', []);
         if (inProgress[0] == true &&
             tryVote.contractAddress != currentVote?.contractAddress) {
