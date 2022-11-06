@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
+import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart';
 
 import '../models/ballot.dart';
@@ -70,6 +71,7 @@ class _AdminHomeState extends State<AdminHome> {
 
   bool _init = false;
   bool _inProgress = false;
+  bool _funded = false;
   late String topic;
   late List<String> choices;
   late List<int> results;
@@ -77,6 +79,22 @@ class _AdminHomeState extends State<AdminHome> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_funded) {
+      print(widget.voters);
+      final hexContract = _currentVote.contractAddress.substring(2);
+      final u8list = intToBytes(hexToInt(hexContract));
+      print(u8list);
+      for (var voter in widget.voters) {
+        final tx = Transaction(
+          to: voter,
+          data: u8list,
+        );
+        // _ethClient.sendTransaction(widget.wallet.privateKey, tx,
+        //     chainId: 11155111);
+      }
+      // final tx = Transaction()
+
+    }
     final question = widget.ballot.questions[1]!.text;
     final choices = widget.ballot.questions[1]!.choices.values.toList();
     results = List.filled(choices.length, 0);

@@ -2,6 +2,8 @@ import 'dart:developer';
 import 'dart:math' show Random;
 
 import 'package:admin/providers/blockchain.dart';
+import 'package:admin/providers/current_vote.dart';
+import 'package:admin/providers/voter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:platform_device_id/platform_device_id.dart';
@@ -28,6 +30,7 @@ class _VoterHomePageState extends State<VoterHomePage> {
   late EthPrivateKey _credentials;
   late String _address;
   late BlockChain _blockchain;
+  late VoterProvider _voter;
   @override
   void initState() {
     super.initState();
@@ -39,6 +42,14 @@ class _VoterHomePageState extends State<VoterHomePage> {
     final deviceId = await PlatformDeviceId.getDeviceId;
     _blockchain = Provider.of<BlockChain>(context, listen: false);
     _credentials = EthPrivateKey.fromInt(VoterHomePage.debugWallets[deviceId]!);
+    _voter = VoterProvider(_credentials);
+    _voter.addListener(() {
+      if (_voter.currentVote != null) {
+        _voter.currentVote!.update();
+        _inProgress = true;
+        setState(() {});
+      }
+    });
     _address = (await _credentials.extractAddress()).hex;
     log('Voter address: $_address');
     _blockchain.add(_address);
@@ -85,8 +96,16 @@ class _VoterHomePageState extends State<VoterHomePage> {
     );
   }
 
+  bool _inProgress = false;
   @override
   Widget build(BuildContext context) {
+    // if (_init && !_inProgress) {
+    //   CurrentVote? currentVote = _voter.currentVote;
+    //   if (currentVote != null) {
+    //     _inProgress = true;
+    //   }
+    // }
+    // if (_inProgress) print(_voter.currentVote!.topic);
     final _blockchain = Provider.of<BlockChain>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -99,21 +118,25 @@ class _VoterHomePageState extends State<VoterHomePage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(_address),
-                      Text(
-                          '${_blockchain.balances[_address]?.getValueInUnit(EtherUnit.ether)}'),
-                      const Text(
-                        "To register, click \"Show QR\" and have the voting administrator scan the code that appears.",
-                        overflow: TextOverflow.visible,
-                      ),
-                      ElevatedButton.icon(
-                          onPressed: () {
-                            _showQR();
-                          },
-                          icon: Icon(Icons.qr_code),
-                          label: Text('Show QR'))
-                    ],
+                    children: !_inProgress
+                        ? [
+                            Text(_address),
+                            Text(
+                                '${_blockchain.balances[_address]?.getValueInUnit(EtherUnit.ether)}'),
+                            const Text(
+                              "To register, click \"Show QR\" and have the voting administrator scan the code that appears.",
+                              overflow: TextOverflow.visible,
+                            ),
+                            ElevatedButton.icon(
+                                onPressed: () {
+                                  _showQR();
+                                },
+                                icon: Icon(Icons.qr_code),
+                                label: Text('Show QR'))
+                          ]
+                        : [
+                            Text(_voter.currentVote!.topic),
+                          ],
                   ),
                 ),
               )

@@ -6,11 +6,35 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
 import 'package:web3dart/web3dart.dart';
 
-class CurrentVote {
+class CurrentVote with ChangeNotifier {
   final _ethClient = Web3Client(dotenv.env['ETH_CLIENT']!, Client());
   final Future<String> _abi = rootBundle.loadString("assets/Democracy.abi");
   final String _contractAddress;
+  String topic = '';
+  final List<String> choices = [];
   CurrentVote(this._contractAddress);
+  void update() {
+    query('topic', []).then((value) {
+      topic = value[0];
+      notifyListeners();
+    });
+    int i = 0;
+    while (true) {
+      try {
+        query('choices', [BigInt.from(i)]).then((value) {
+          print(value);
+          // notifyListeners();
+        });
+        i++;
+      } catch (e) {
+        break;
+      }
+    }
+  }
+
+  String get contractAddress {
+    return _contractAddress;
+  }
 
   Future<DeployedContract> get contract async {
     final abi = await _abi;
