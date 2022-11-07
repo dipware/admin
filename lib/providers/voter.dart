@@ -55,22 +55,31 @@ class VoterProvider with ChangeNotifier {
     final responseRaw = await http.get(uri);
     final response = jsonDecode(responseRaw.body) as Map<String, dynamic>;
     final List<dynamic> result = response['result'];
-    for (final tx in result) {
+    for (final tx in result.reversed) {
       if (tx['isError'] == '1') continue;
       if (tx['value'] != '0') continue;
       if (tx['to'] != address.hex) continue;
-      print(tx['input']);
-      final tryVote = CurrentVote(tx['input']);
-      final inProgress = await tryVote.query('inProgress', []);
+      final txString = tx['input'] as String;
+      final txParsed = txString.substring(txString.length - 40);
+      print(txParsed);
+      final tryVote = CurrentVote('0x' + txParsed);
+      List<dynamic> inProgress;
+      try {
+        inProgress = await tryVote.query('inProgress', []);
+        print(inProgress);
+      } catch (_) {
+        break;
+      }
       // print(tryVote.contractAddress);
       // print(currentVote?.contractAddress);
       // final locked = await tryVote.query('locked', []);
-      if (inProgress[0] == true &&
-          tryVote.contractAddress != currentVote?.contractAddress) {
+      if (inProgress[0] == true && currentVote == null) {
         print(tryVote.contractAddress);
         currentVote = tryVote;
+        await currentVote!.update();
+        notifyListeners();
+        break;
       }
     }
-    notifyListeners();
   }
 }

@@ -12,28 +12,35 @@ import 'package:web3dart/web3dart.dart';
 import '../models/ballot.dart';
 
 class AdminHome extends StatefulWidget {
-  const AdminHome({
+  AdminHome({
     Key? key,
     // required this.tx,
     required this.wallet,
     required this.voters,
     required this.ballot,
     required this.tx,
-  }) : super(key: key);
+  }) : super(key: key) {
+    question = ballot.questions[1]!.text;
+    choices = ballot.questions[1]!.choices.values.toList();
+    results = List.filled(choices.length, 0);
+  }
   final String tx;
   final List<EthereumAddress> voters;
   final Ballot ballot;
   final Wallet wallet;
+  late String question;
+  late List<String> choices;
+  late List<int> results;
   @override
   State<AdminHome> createState() => _AdminHomeState();
 }
 
 class _AdminHomeState extends State<AdminHome> {
   final _ethClient = Web3Client(dotenv.env['ETH_CLIENT']!, Client());
-
   @override
   void initState() {
     super.initState();
+    results = widget.results;
     _ethClient.addedBlocks().listen((event) async {
       if (_init) {
         if (_inProgress == false) {
@@ -70,32 +77,10 @@ class _AdminHomeState extends State<AdminHome> {
     _ethClient.dispose();
   }
 
-  bool _init = false;
-  bool _inProgress = false;
-  bool _funded = false;
-  late String topic;
-  late List<String> choices;
-  late List<int> results;
-  late CurrentVote _currentVote;
-  int test = 1;
-  @override
-  Widget build(BuildContext context) {
-    // if (test == 1) {
-    //   for (var voter in widget.voters) {
-    //     final tx = Transaction(
-    //       to: voter,
-    //       value: EtherAmount.fromUnitAndValue(EtherUnit.finney, 8),
-    //     );
-    //     _ethClient.sendTransaction(widget.wallet.privateKey, tx, chainId: 5);
-    //   }
-    //   print("OK");
-    //   test++;
-    // }
+  void _broadcastContract() {
     if (!_funded && _inProgress) {
-      print(widget.voters);
       final hexContract = _currentVote.contractAddress;
       final u8list = intToBytes(hexToInt(hexContract));
-      print(u8list);
       for (var voter in widget.voters) {
         final tx = Transaction(
           to: voter,
@@ -105,17 +90,16 @@ class _AdminHomeState extends State<AdminHome> {
       }
       _funded = true;
       setState(() {});
-      // final tx = Transaction()
-
     }
-    final question = widget.ballot.questions[1]!.text;
-    final choices = widget.ballot.questions[1]!.choices.values.toList();
-    results = List.filled(choices.length, 0);
-    // log(widget.ballot.questions[1]!.text.toString());
-    final contract =
-        Provider.of<BlockChain>(context).contracts.singleWhere((element) {
+  }
+
+  Map<String, String> _getContractMap() {
+    return Provider.of<BlockChain>(context).contracts.singleWhere((element) {
       return element['tx'] == widget.tx;
     }, orElse: (() => {}));
+  }
+
+  void _beginVote(Map<String, String> contract) {
     log(contract.toString());
     if (contract.isNotEmpty && _init == false) {
       _currentVote = CurrentVote(contract['address']!);
@@ -126,7 +110,7 @@ class _AdminHomeState extends State<AdminHome> {
           _inProgress = value[0];
           if (value[0] == false) {
             _currentVote.submit('beginVote', widget.wallet.privateKey,
-                [question, choices, widget.voters]).then((value) {
+                [widget.question, widget.choices, widget.voters]).then((value) {
               log('beginVote: $value');
               setState(() {
                 _init = true;
@@ -136,6 +120,19 @@ class _AdminHomeState extends State<AdminHome> {
         });
       });
     }
+  }
+
+  bool _init = false;
+  bool _inProgress = false;
+  bool _funded = false;
+  late String topic;
+  List<int> results = [];
+  late CurrentVote _currentVote;
+  @override
+  Widget build(BuildContext context) {
+    _broadcastContract();
+    final contract = _getContractMap();
+    _beginVote(contract);
     return Scaffold(
       body: Center(
         child: Column(
@@ -144,10 +141,10 @@ class _AdminHomeState extends State<AdminHome> {
             // Text('tx: ${widget.tx}', overflow: TextOverflow.visible),
             if (contract.isNotEmpty) ...[
               Text('In Progress: $_inProgress'),
-              Text('Topic: $question'),
+              Text('Topic: ${widget.question}'),
               const Text('Results'),
-              Text('${choices[0]}: ${results[0]}'),
-              Text('${choices[0]}: ${results[1]}'),
+              Text('${widget.choices[0]}: ${results[0]}'),
+              Text('${widget.choices[1]}: ${results[1]}'),
               Text(
                 'address: ${contract['address']}',
                 overflow: TextOverflow.visible,

@@ -45,7 +45,7 @@ class _VoterHomePageState extends State<VoterHomePage> {
     _voter = VoterProvider(_credentials);
     _voter.addListener(() async {
       if (_voter.currentVote != null && !_inProgress) {
-        await _voter.currentVote!.update();
+        // await _voter.currentVote!.update();
         _inProgress = true;
         setState(() {});
       }
@@ -100,7 +100,8 @@ class _VoterHomePageState extends State<VoterHomePage> {
   @override
   Widget build(BuildContext context) {
     if (_inProgress) {
-      _voter.currentVote!.query('locked', []).then((value) => print(value));
+      print(_voter.currentVote!.choices);
+      // _voter.currentVote!.query('locked', []).then((value) => print(value));
     }
     // if (_inProgress) print(_voter.currentVote!.topic);
     final _blockchain = Provider.of<BlockChain>(context);
@@ -142,7 +143,9 @@ class _VoterHomePageState extends State<VoterHomePage> {
                               child: Text('Vote'),
                               onPressed: () {
                                 _voter.currentVote!.submit(
-                                    'sendBallot', _credentials, [BigInt.one]);
+                                    'sendBallot',
+                                    _credentials,
+                                    [BigInt.one]).then((value) => print(value));
                               },
                             )
                           ]),
