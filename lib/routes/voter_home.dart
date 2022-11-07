@@ -43,9 +43,9 @@ class _VoterHomePageState extends State<VoterHomePage> {
     _blockchain = Provider.of<BlockChain>(context, listen: false);
     _credentials = EthPrivateKey.fromInt(VoterHomePage.debugWallets[deviceId]!);
     _voter = VoterProvider(_credentials);
-    _voter.addListener(() {
-      if (_voter.currentVote != null) {
-        _voter.currentVote!.update();
+    _voter.addListener(() async {
+      if (_voter.currentVote != null && !_inProgress) {
+        await _voter.currentVote!.update();
         _inProgress = true;
         setState(() {});
       }
@@ -99,12 +99,9 @@ class _VoterHomePageState extends State<VoterHomePage> {
   bool _inProgress = false;
   @override
   Widget build(BuildContext context) {
-    // if (_init && !_inProgress) {
-    //   CurrentVote? currentVote = _voter.currentVote;
-    //   if (currentVote != null) {
-    //     _inProgress = true;
-    //   }
-    // }
+    if (_inProgress) {
+      _voter.currentVote!.query('locked', []).then((value) => print(value));
+    }
     // if (_inProgress) print(_voter.currentVote!.topic);
     final _blockchain = Provider.of<BlockChain>(context);
     return Scaffold(
@@ -119,7 +116,7 @@ class _VoterHomePageState extends State<VoterHomePage> {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: !_inProgress
-                        ? [
+                        ? ([
                             Text(_address),
                             Text(
                                 '${_blockchain.balances[_address]?.getValueInUnit(EtherUnit.ether)}'),
@@ -133,10 +130,22 @@ class _VoterHomePageState extends State<VoterHomePage> {
                                 },
                                 icon: Icon(Icons.qr_code),
                                 label: Text('Show QR'))
-                          ]
-                        : [
+                          ])
+                        : ([
+                            Text(_voter.currentVote!.contractAddress),
+                            // Text(_voter.currentVote!.inProgress.toString()),
                             Text(_voter.currentVote!.topic),
-                          ],
+                            ..._voter.currentVote!.choices
+                                .map((e) => Text(e))
+                                .toList(),
+                            ElevatedButton(
+                              child: Text('Vote'),
+                              onPressed: () {
+                                _voter.currentVote!.submit(
+                                    'sendBallot', _credentials, [BigInt.one]);
+                              },
+                            )
+                          ]),
                   ),
                 ),
               )

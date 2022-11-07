@@ -2,11 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:admin/providers/current_vote.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 import 'package:web3dart/web3dart.dart';
 
 class VoterProvider with ChangeNotifier {
@@ -20,6 +18,9 @@ class VoterProvider with ChangeNotifier {
 
   VoterProvider(this.voterCredentials) {
     _fetchContractAddress();
+    listener = _ethClient.addedBlocks().listen((event) {
+      _fetchContractAddress();
+    });
   }
   @override
   void dispose() {
@@ -41,7 +42,7 @@ class VoterProvider with ChangeNotifier {
   void _fetchContractAddress() async {
     final address = await voterCredentials.extractAddress();
 
-    const url = 'api-sepolia.etherscan.io';
+    const url = 'api-goerli.etherscan.io';
     final esKey = dotenv.env['ETHERSCAN'];
 
     final uri = Uri.https(url, '/api', {
@@ -50,24 +51,26 @@ class VoterProvider with ChangeNotifier {
       'address': address.hex,
       'apikey': esKey,
     });
-    listener = _ethClient.addedBlocks().listen((event) async {
-      final responseRaw = await http.get(uri);
-      final response = jsonDecode(responseRaw.body) as Map<String, dynamic>;
-      final List<dynamic> result = response['result'];
-      for (final tx in result) {
-        if (tx['isError'] == '1') continue;
-        if (tx['value'] != '0') continue;
-        final tryVote = CurrentVote(tx['input']);
-        final inProgress = await tryVote.query('inProgress', []);
+
+    final responseRaw = await http.get(uri);
+    final response = jsonDecode(responseRaw.body) as Map<String, dynamic>;
+    final List<dynamic> result = response['result'];
+    for (final tx in result) {
+      if (tx['isError'] == '1') continue;
+      if (tx['value'] != '0') continue;
+      if (tx['to'] != address.hex) continue;
+      print(tx['input']);
+      final tryVote = CurrentVote(tx['input']);
+      final inProgress = await tryVote.query('inProgress', []);
+      // print(tryVote.contractAddress);
+      // print(currentVote?.contractAddress);
+      // final locked = await tryVote.query('locked', []);
+      if (inProgress[0] == true &&
+          tryVote.contractAddress != currentVote?.contractAddress) {
         print(tryVote.contractAddress);
-        print(currentVote?.contractAddress);
-        // final locked = await tryVote.query('locked', []);
-        if (inProgress[0] == true &&
-            tryVote.contractAddress != currentVote?.contractAddress) {
-          currentVote = tryVote;
-          notifyListeners();
-        }
+        currentVote = tryVote;
       }
-    });
+    }
+    notifyListeners();
   }
 }

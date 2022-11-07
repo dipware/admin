@@ -49,7 +49,7 @@ class BlockChain with ChangeNotifier {
   }
 
   void _fetchTxs(String address) async {
-    const url = 'api-sepolia.etherscan.io';
+    const url = 'api-goerli.etherscan.io';
     final esKey = dotenv.env['ETHERSCAN'];
 
     final uri = Uri.https(url, '/api', {

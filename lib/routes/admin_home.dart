@@ -34,7 +34,7 @@ class _AdminHomeState extends State<AdminHome> {
   @override
   void initState() {
     super.initState();
-    _ethClient.addedBlocks().listen((event) {
+    _ethClient.addedBlocks().listen((event) async {
       if (_init) {
         if (_inProgress == false) {
           _currentVote.query('inProgress', []).then((value) {
@@ -45,11 +45,12 @@ class _AdminHomeState extends State<AdminHome> {
         } else {
           final List<int> newResults = [...results];
           for (var i = 0; i < newResults.length; i++) {
-            _currentVote.query('results', [BigInt.from(i)]).then((resultsList) {
-              log('Results for choice $i: $resultsList');
-              newResults[i] = (resultsList.first as BigInt).toInt();
-            });
+            final resultsList =
+                await _currentVote.query('results', [BigInt.from(i)]);
+            log('Results for choice $i: $resultsList');
+            newResults[i] = (resultsList.first as BigInt).toInt();
           }
+
           log('results: $results');
           log('newResults: $newResults');
           if (!listEquals(results, newResults)) {
@@ -76,12 +77,23 @@ class _AdminHomeState extends State<AdminHome> {
   late List<String> choices;
   late List<int> results;
   late CurrentVote _currentVote;
-
+  int test = 1;
   @override
   Widget build(BuildContext context) {
-    if (!_funded) {
+    // if (test == 1) {
+    //   for (var voter in widget.voters) {
+    //     final tx = Transaction(
+    //       to: voter,
+    //       value: EtherAmount.fromUnitAndValue(EtherUnit.finney, 8),
+    //     );
+    //     _ethClient.sendTransaction(widget.wallet.privateKey, tx, chainId: 5);
+    //   }
+    //   print("OK");
+    //   test++;
+    // }
+    if (!_funded && _inProgress) {
       print(widget.voters);
-      final hexContract = _currentVote.contractAddress.substring(2);
+      final hexContract = _currentVote.contractAddress;
       final u8list = intToBytes(hexToInt(hexContract));
       print(u8list);
       for (var voter in widget.voters) {
@@ -89,9 +101,10 @@ class _AdminHomeState extends State<AdminHome> {
           to: voter,
           data: u8list,
         );
-        // _ethClient.sendTransaction(widget.wallet.privateKey, tx,
-        //     chainId: 11155111);
+        _ethClient.sendTransaction(widget.wallet.privateKey, tx, chainId: 5);
       }
+      _funded = true;
+      setState(() {});
       // final tx = Transaction()
 
     }

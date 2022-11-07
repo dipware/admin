@@ -10,26 +10,30 @@ class CurrentVote with ChangeNotifier {
   final Future<String> _abi = rootBundle.loadString("assets/Democracy.abi");
   final String _contractAddress;
   String topic = '';
-  final List<String> choices = [];
+  List<String> choices = [];
   CurrentVote(this._contractAddress);
 
-  void update() {
-    query('topic', []).then((value) {
-      topic = value[0];
-      notifyListeners();
-    });
+  Future<void> update() async {
+    final topicRet = await query('topic', []);
+    topic = topicRet[0];
+    final List<String> choicesRet = [];
+
     int i = 0;
     while (true) {
       try {
-        query('choices', [BigInt.from(i)]).then((value) {
-          print(value);
-          // notifyListeners();
-        });
+        final choiceRet = await query('choices', [BigInt.from(i)]);
+        choicesRet.add(choiceRet[0]);
         i++;
       } catch (e) {
         break;
       }
     }
+    choices = choicesRet;
+    notifyListeners();
+  }
+
+  Future<bool> get locked async {
+    return (await query('locked', []))[0];
   }
 
   String get contractAddress {
@@ -79,8 +83,8 @@ class CurrentVote with ChangeNotifier {
     final result = ethClient.sendTransaction(
       credentials,
       tx,
-      // chainId: 5,
-      chainId: 11155111,
+      chainId: 5,
+      // chainId: 11155111,
     );
     ethClient.dispose();
     return result;
