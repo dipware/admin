@@ -43,10 +43,10 @@ class _AdminHomeState extends State<AdminHome> {
     results = widget.results;
     _ethClient.addedBlocks().listen((event) async {
       if (_init) {
-        if (_inProgress == false) {
-          _currentVote.query('inProgress', []).then((value) {
+        if (_started == false) {
+          _currentVote.query('started', []).then((value) {
             setState(() {
-              _inProgress = value[0];
+              _started = value[0];
             });
           });
         } else {
@@ -78,7 +78,7 @@ class _AdminHomeState extends State<AdminHome> {
   }
 
   void _broadcastContract() {
-    if (!_funded && _inProgress) {
+    if (!_funded && _started) {
       final hexContract = _currentVote.contractAddress;
       final u8list = intToBytes(hexToInt(hexContract));
       for (var voter in widget.voters) {
@@ -86,7 +86,11 @@ class _AdminHomeState extends State<AdminHome> {
           to: voter,
           data: u8list,
         );
-        _ethClient.sendTransaction(widget.wallet.privateKey, tx, chainId: 5);
+        _ethClient.sendTransaction(
+          widget.wallet.privateKey,
+          tx,
+          chainId: int.parse(dotenv.env['CHAIN_ID']!),
+        );
       }
       _funded = true;
       setState(() {});
@@ -105,9 +109,9 @@ class _AdminHomeState extends State<AdminHome> {
       _currentVote = CurrentVote(contract['address']!);
       _currentVote.query('topic', []).then((value) {
         topic = value[0];
-        _currentVote.query('inProgress', []).then((value) {
-          log('inProgress: ${value[0]}');
-          _inProgress = value[0];
+        _currentVote.query('started', []).then((value) {
+          log('started: ${value[0]}');
+          _started = value[0];
           if (value[0] == false) {
             _currentVote.submit('beginVote', widget.wallet.privateKey,
                 [widget.question, widget.choices, widget.voters]).then((value) {
@@ -123,7 +127,7 @@ class _AdminHomeState extends State<AdminHome> {
   }
 
   bool _init = false;
-  bool _inProgress = false;
+  bool _started = false;
   bool _funded = false;
   late String topic;
   List<int> results = [];
@@ -140,7 +144,7 @@ class _AdminHomeState extends State<AdminHome> {
           children: [
             // Text('tx: ${widget.tx}', overflow: TextOverflow.visible),
             if (contract.isNotEmpty) ...[
-              Text('In Progress: $_inProgress'),
+              Text('In Progress: $_started'),
               Text('Topic: ${widget.question}'),
               const Text('Results'),
               Text('${widget.choices[0]}: ${results[0]}'),

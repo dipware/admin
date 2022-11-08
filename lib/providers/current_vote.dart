@@ -83,7 +83,7 @@ class CurrentVote with ChangeNotifier {
     final result = ethClient.sendTransaction(
       credentials,
       tx,
-      chainId: 5,
+      chainId: int.parse(dotenv.env['CHAIN_ID']!),
       // chainId: 11155111,
     );
     ethClient.dispose();

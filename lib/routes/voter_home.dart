@@ -44,9 +44,8 @@ class _VoterHomePageState extends State<VoterHomePage> {
     _credentials = EthPrivateKey.fromInt(VoterHomePage.debugWallets[deviceId]!);
     _voter = VoterProvider(_credentials);
     _voter.addListener(() async {
-      if (_voter.currentVote != null && !_inProgress) {
-        // await _voter.currentVote!.update();
-        _inProgress = true;
+      if (_voter.currentVote != null && !_started) {
+        _started = true;
         setState(() {});
       }
     });
@@ -56,13 +55,13 @@ class _VoterHomePageState extends State<VoterHomePage> {
     _init = true;
     setState(() {});
   }
-
-  Future<void> _generateDebugWallet() async {
-    final deviceId = await PlatformDeviceId.getDeviceId;
-    log(deviceId!);
-    _credentials = EthPrivateKey.createRandom(Random.secure());
-    log(_credentials.privateKeyInt.toString());
-  }
+  // Uncomment to make a static wallet
+  // Future<void> _generateDebugWallet() async {
+  //   final deviceId = await PlatformDeviceId.getDeviceId;
+  //   log(deviceId!);
+  //   _credentials = EthPrivateKey.createRandom(Random.secure());
+  //   log(_credentials.privateKeyInt.toString());
+  // }
 
   @override
   void dispose() {
@@ -96,27 +95,26 @@ class _VoterHomePageState extends State<VoterHomePage> {
     );
   }
 
-  bool _inProgress = false;
+  bool _started = false;
   @override
   Widget build(BuildContext context) {
-    if (_inProgress) {
+    if (_started) {
       print(_voter.currentVote!.choices);
       // _voter.currentVote!.query('locked', []).then((value) => print(value));
     }
-    // if (_inProgress) print(_voter.currentVote!.topic);
+    // if (_started) print(_voter.currentVote!.topic);
     final _blockchain = Provider.of<BlockChain>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       body: Center(
         child: _init
             ? Card(
-                // color: Theme.of(context).cardTheme.color,
                 child: Padding(
                   padding: const EdgeInsets.all(11.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: !_inProgress
+                    children: !_started
                         ? ([
                             Text(_address),
                             Text(
@@ -126,15 +124,13 @@ class _VoterHomePageState extends State<VoterHomePage> {
                               overflow: TextOverflow.visible,
                             ),
                             ElevatedButton.icon(
-                                onPressed: () {
-                                  _showQR();
-                                },
-                                icon: Icon(Icons.qr_code),
-                                label: Text('Show QR'))
+                                onPressed: _showQR,
+                                icon: const Icon(Icons.qr_code),
+                                label: const Text('Show QR'))
                           ])
                         : ([
                             Text(_voter.currentVote!.contractAddress),
-                            // Text(_voter.currentVote!.inProgress.toString()),
+                            // Text(_voter.currentVote!.started.toString()),
                             Text(_voter.currentVote!.topic),
                             ..._voter.currentVote!.choices
                                 .map((e) => Text(e))

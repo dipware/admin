@@ -49,10 +49,10 @@ class BlockChain with ChangeNotifier {
   }
 
   void _fetchTxs(String address) async {
-    const url = 'api-goerli.etherscan.io';
+    final url = dotenv.env['API_URL'];
     final esKey = dotenv.env['ETHERSCAN'];
 
-    final uri = Uri.https(url, '/api', {
+    final uri = Uri.https(url!, '/api', {
       'module': 'account',
       'action': 'txlist',
       'address': address,

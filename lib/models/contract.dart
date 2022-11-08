@@ -28,7 +28,7 @@ class Contract {
       ),
       // chainId: 11155111,
       // chainId: 1337,
-      chainId: 5,
+      chainId: int.parse(dotenv.env['CHAIN_ID']!),
     );
     ethClient.dispose();
     return tx;

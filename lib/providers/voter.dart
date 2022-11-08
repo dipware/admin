@@ -42,10 +42,10 @@ class VoterProvider with ChangeNotifier {
   void _fetchContractAddress() async {
     final address = await voterCredentials.extractAddress();
 
-    const url = 'api-goerli.etherscan.io';
+    final url = dotenv.env['API_URL'];
     final esKey = dotenv.env['ETHERSCAN'];
 
-    final uri = Uri.https(url, '/api', {
+    final uri = Uri.https(url!, '/api', {
       'module': 'account',
       'action': 'txlist',
       'address': address.hex,
@@ -63,17 +63,17 @@ class VoterProvider with ChangeNotifier {
       final txParsed = txString.substring(txString.length - 40);
       print(txParsed);
       final tryVote = CurrentVote('0x' + txParsed);
-      List<dynamic> inProgress;
+      List<dynamic> started;
       try {
-        inProgress = await tryVote.query('inProgress', []);
-        print(inProgress);
+        started = await tryVote.query('started', []);
+        print(started);
       } catch (_) {
         break;
       }
       // print(tryVote.contractAddress);
       // print(currentVote?.contractAddress);
       // final locked = await tryVote.query('locked', []);
-      if (inProgress[0] == true && currentVote == null) {
+      if (started[0] == true && currentVote == null) {
         print(tryVote.contractAddress);
         currentVote = tryVote;
         await currentVote!.update();
