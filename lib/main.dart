@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'providers/blockchain.dart';
 import 'routes/voter_home.dart';
+import 'routes/voter_portal.dart';
 import 'routes/wallet_home.dart';
 import 'routes/wallets_list.dart';
 import 'routes/home.dart';
@@ -39,6 +40,7 @@ class _VoterAdminAppState extends State<DemocracyApp> {
               ),
           VoterHomePage.routeName: (_) => const VoterHomePage(),
           WalletHome.routeName: (_) => const WalletHome(),
+          VoterPortal.routeName: (_) => const VoterPortal(),
         },
       ),
     );

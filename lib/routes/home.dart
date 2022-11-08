@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../routes/voter_home.dart';
 import '../routes/wallets_list.dart';
+import 'voter_portal.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -64,7 +65,8 @@ class _HomePageState extends State<HomePage> {
               // ),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, VoterHomePage.routeName);
+                  Navigator.pushNamed(context, VoterPortal.routeName);
+                  // Navigator.pushNamed(context, VoterHomePage.routeName);
                 },
                 child: const Text(
                   "Voter",

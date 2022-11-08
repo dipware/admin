@@ -2,10 +2,8 @@ import 'dart:developer';
 import 'dart:math' show Random;
 
 import 'package:admin/providers/blockchain.dart';
-import 'package:admin/providers/current_vote.dart';
 import 'package:admin/providers/voter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:platform_device_id/platform_device_id.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';

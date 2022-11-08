@@ -32,12 +32,21 @@ class CurrentVote with ChangeNotifier {
     notifyListeners();
   }
 
+  // Future<String> get topic async {
+
+  //   return (await query('started', []))[0];
+  // }
+
   Future<bool> get started async {
     return (await query('started', []))[0];
   }
 
   Future<bool> get ended async {
     return (await query('ended', []))[0];
+  }
+
+  Future<String> get version async {
+    return (await query('version', []))[0];
   }
 
   Future<List<int>> get results async {
