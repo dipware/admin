@@ -183,8 +183,6 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                     actions: [
                                       ElevatedButton.icon(
                                           onPressed: () async {
-                                            // final tx = await contract.deploy(
-                                            //     widget.wallet.privateKey);
                                             final keys =
                                                 await Navigator.of(context)
                                                     .push<List<String>>(
@@ -199,20 +197,11 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                                     EthereumAddress.fromHex(e))
                                                 .toList();
                                             log(voters.toString());
-                                            // final currentVote =
-                                            //     CurrentVoteProvider(tx);
-                                            // final ret = await currentVote
-                                            //     .submit('beginVote',
-                                            //         widget.wallet.privateKey, [
-                                            //   question,
-                                            //   choices,
-                                            //   voters,
-                                            // ]);
-                                            // log(ret);
                                             final tx = await Contract().deploy(
                                                 widget.wallet.privateKey);
                                             log('Creation tx: $tx');
-                                            Navigator.of(context).push(
+                                            Navigator.of(context)
+                                                .pushReplacement(
                                               MaterialPageRoute(
                                                 builder: (_) => AdminHome(
                                                   tx: tx,
@@ -308,8 +297,8 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                                         ),
                                       ),
                                     )));
-                            log('Erasing ballot');
-                            _ballot = Ballot();
+                            // log('Erasing ballot');
+                            // _ballot = Ballot();
                           }
                         },
                         icon: const Icon(Icons.check),

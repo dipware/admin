@@ -44,20 +44,10 @@ class _AdminHomeState extends State<AdminHome> {
     _ethClient.addedBlocks().listen((event) async {
       if (_init) {
         if (_started == false) {
-          _currentVote.query('started', []).then((value) {
-            setState(() {
-              _started = value[0];
-            });
-          });
+          _started = await _currentVote.started;
+          if (_started) setState(() {});
         } else {
-          final List<int> newResults = [...results];
-          for (var i = 0; i < newResults.length; i++) {
-            final resultsList =
-                await _currentVote.query('results', [BigInt.from(i)]);
-            log('Results for choice $i: $resultsList');
-            newResults[i] = (resultsList.first as BigInt).toInt();
-          }
-
+          final List<int> newResults = await _currentVote.results;
           log('results: $results');
           log('newResults: $newResults');
           if (!listEquals(results, newResults)) {
@@ -66,6 +56,10 @@ class _AdminHomeState extends State<AdminHome> {
               results = newResults;
             });
           }
+        }
+        if (!_ended) {
+          _ended = await _currentVote.ended;
+          if (_ended) setState(() {});
         }
       }
     });
@@ -103,25 +97,21 @@ class _AdminHomeState extends State<AdminHome> {
     }, orElse: (() => {}));
   }
 
-  void _beginVote(Map<String, String> contract) {
+  void _beginVote(Map<String, String> contract) async {
     log(contract.toString());
-    if (contract.isNotEmpty && _init == false) {
-      _currentVote = CurrentVote(contract['address']!);
-      _currentVote.query('topic', []).then((value) {
-        topic = value[0];
-        _currentVote.query('started', []).then((value) {
-          log('started: ${value[0]}');
-          _started = value[0];
-          if (value[0] == false) {
-            _currentVote.submit('beginVote', widget.wallet.privateKey,
-                [widget.question, widget.choices, widget.voters]).then((value) {
-              log('beginVote: $value');
-              setState(() {
-                _init = true;
-              });
-            });
-          }
-        });
+    _currentVote = CurrentVote(contract['address']!);
+    await _currentVote.update();
+    topic = _currentVote.topic;
+    _started = await _currentVote.started;
+    log('started: $_started');
+    if (!_started) {
+      final tx = await _currentVote.beginVote(widget.wallet.privateKey,
+          widget.question, widget.choices, widget.voters);
+      // final receipt = await _ethClient.getTransactionReceipt(tx);
+      // print(receipt!.blockNumber.toString());
+      // log('beginVote: $value');
+      setState(() {
+        _init = true;
       });
     }
   }
@@ -129,32 +119,45 @@ class _AdminHomeState extends State<AdminHome> {
   bool _init = false;
   bool _started = false;
   bool _funded = false;
+  bool _ended = false;
   late String topic;
   List<int> results = [];
   late CurrentVote _currentVote;
   @override
   Widget build(BuildContext context) {
+    if (_ended) Navigator.of(context).pop();
     _broadcastContract();
     final contract = _getContractMap();
-    _beginVote(contract);
+    if (contract.isNotEmpty && !_init) {
+      _beginVote(contract);
+    }
+    // _currentVote.results.then((value) => print(value));
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Text('tx: ${widget.tx}', overflow: TextOverflow.visible),
-            if (contract.isNotEmpty) ...[
-              Text('In Progress: $_started'),
-              Text('Topic: ${widget.question}'),
-              const Text('Results'),
-              Text('${widget.choices[0]}: ${results[0]}'),
-              Text('${widget.choices[1]}: ${results[1]}'),
-              Text(
-                'address: ${contract['address']}',
-                overflow: TextOverflow.visible,
+            if (contract.isEmpty) const Text('Transaction Broadcasting...'),
+            if (contract.isNotEmpty)
+              ListTile(
+                title: const Text('Contract Address'),
+                subtitle: Text(contract['address']!),
               ),
-            ],
-            Text('wallet: ${widget.wallet}'),
+            if (!_started) const Text('The vote will begin shortly'),
+            if (_started && !_ended) const Text('Voting in Progress...'),
+            if (_ended) const Text('Voting Complete'),
+            // Text('tx: ${widget.tx}', overflow: TextOverflow.visible),
+            // if (contract.isNotEmpty) ...[
+            //   Text('In Progress: $_started'),
+            //   Text('Topic: ${widget.question}'),
+            //   const Text('Results'),
+            //   Text('${widget.choices[0]}: ${results[0]}'),
+            //   Text('${widget.choices[1]}: ${results[1]}'),
+            //   Text(
+            //     'address: ${contract['address']}',
+            //     overflow: TextOverflow.visible,
+            //   ),
+            // ],
           ],
         ),
       ),

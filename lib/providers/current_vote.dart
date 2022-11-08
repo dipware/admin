@@ -32,8 +32,37 @@ class CurrentVote with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> get locked async {
-    return (await query('locked', []))[0];
+  Future<bool> get started async {
+    return (await query('started', []))[0];
+  }
+
+  Future<bool> get ended async {
+    return (await query('ended', []))[0];
+  }
+
+  Future<List<int>> get results async {
+    final List<int> resultsRet = [];
+
+    int i = 0;
+    while (true) {
+      try {
+        final resultRet = await query('results', [BigInt.from(i)]);
+        resultsRet.add((resultRet[0] as BigInt).toInt());
+        i++;
+      } catch (e) {
+        break;
+      }
+    }
+    return resultsRet;
+  }
+
+  Future<String> beginVote(
+    EthPrivateKey pk,
+    String topic,
+    List<String> choices,
+    List<EthereumAddress> voters,
+  ) async {
+    return submit('beginVote', pk, [topic, choices, voters]);
   }
 
   String get contractAddress {

@@ -64,10 +64,14 @@ class VoterProvider with ChangeNotifier {
       print(txParsed);
       final tryVote = CurrentVote('0x' + txParsed);
       List<dynamic> started;
+      List<dynamic> ended;
       try {
         started = await tryVote.query('started', []);
-        print(started);
+        ended = await tryVote.query('ended', []);
       } catch (_) {
+        break;
+      }
+      if (ended[0] == true) {
         break;
       }
       // print(tryVote.contractAddress);

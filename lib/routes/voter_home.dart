@@ -46,6 +46,8 @@ class _VoterHomePageState extends State<VoterHomePage> {
     _voter.addListener(() async {
       if (_voter.currentVote != null && !_started) {
         _started = true;
+        _voter.currentVote!
+            .query('ended', []).then((value) => print('ended: $value'));
         setState(() {});
       }
     });
@@ -66,6 +68,7 @@ class _VoterHomePageState extends State<VoterHomePage> {
   @override
   void dispose() {
     _blockchain.disposeAddress(_address);
+    _voter.listener?.cancel();
     super.dispose();
   }
 
@@ -95,12 +98,57 @@ class _VoterHomePageState extends State<VoterHomePage> {
     );
   }
 
+  Widget _cardTitle() {
+    final address = _voter.currentVote!.contractAddress;
+    return ListTile(
+      title: Text('Vote/Contract Address'),
+      subtitle: Text(address),
+      trailing:
+          IconButton(onPressed: () {}, icon: const Icon(Icons.open_in_browser)),
+    );
+  }
+
+  Widget _topic() {
+    final topic = _voter.currentVote!.topic;
+    return ListTile(
+      title: Text('Topic'),
+      subtitle: Text(topic),
+    );
+  }
+
+  Widget _choices() {
+    final choices = _voter.currentVote!.choices;
+    final List<Widget> buttons = [];
+    for (var choice in choices) {
+      buttons.add(
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ElevatedButton(
+            child: Text(choice),
+            onPressed: () {
+              _voter.currentVote!.submit('sendBallot', _credentials, [
+                BigInt.from(choices.indexOf(choice))
+              ]).then((value) => print(value));
+            },
+          ),
+        ),
+      );
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: buttons,
+    );
+  }
+
   bool _started = false;
   @override
   Widget build(BuildContext context) {
     if (_started) {
-      print(_voter.currentVote!.choices);
-      // _voter.currentVote!.query('locked', []).then((value) => print(value));
+      _voter.currentVote!.query('ended', []).then((value) {
+        if (value[0] == true) {
+          Navigator.of(context).pop();
+        }
+      });
     }
     // if (_started) print(_voter.currentVote!.topic);
     final _blockchain = Provider.of<BlockChain>(context);
@@ -129,21 +177,9 @@ class _VoterHomePageState extends State<VoterHomePage> {
                                 label: const Text('Show QR'))
                           ])
                         : ([
-                            Text(_voter.currentVote!.contractAddress),
-                            // Text(_voter.currentVote!.started.toString()),
-                            Text(_voter.currentVote!.topic),
-                            ..._voter.currentVote!.choices
-                                .map((e) => Text(e))
-                                .toList(),
-                            ElevatedButton(
-                              child: Text('Vote'),
-                              onPressed: () {
-                                _voter.currentVote!.submit(
-                                    'sendBallot',
-                                    _credentials,
-                                    [BigInt.one]).then((value) => print(value));
-                              },
-                            )
+                            _cardTitle(),
+                            _topic(),
+                            _choices(),
                           ]),
                   ),
                 ),
