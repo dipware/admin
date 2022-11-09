@@ -3,13 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:platform_device_id/platform_device_id.dart';
-import 'package:provider/provider.dart';
 import 'package:web3dart/web3dart.dart';
+import 'package:http/http.dart' as http;
 
-import '../providers/blockchain.dart';
 import '../providers/current_vote.dart';
 import 'voter_home.dart';
-import 'package:http/http.dart' as http;
 
 class PastVote {
   final String address;
@@ -48,12 +46,12 @@ class _VoterHistoryState extends State<VoterHistory> {
     _credentials = EthPrivateKey.fromInt(VoterHomePage.debugWallets[deviceId]!);
     _address = (await _credentials.extractAddress()).hex;
     print('address: $_address');
-    await _fetchContractAddress();
+    await _fetchHistory();
     _init = true;
     setState(() {});
   }
 
-  Future<void> _fetchContractAddress() async {
+  Future<void> _fetchHistory() async {
     final url = dotenv.env['API_URL'];
     final esKey = dotenv.env['ETHERSCAN'];
 
