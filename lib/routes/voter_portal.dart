@@ -31,49 +31,25 @@ class VoterPortal extends StatefulWidget {
 }
 
 class _VoterPortalState extends State<VoterPortal> {
-  final _client = Client();
-  late Web3Client _ethClient;
-  late StreamSubscription<String> _listener;
   int _selectedIndex = 1;
-  bool _init = false;
   @override
   void initState() {
     super.initState();
-    _ethClient = Web3Client(dotenv.env['ETH_CLIENT']!, _client);
-    _listener = _ethClient.addedBlocks().listen((blockHash) {});
   }
 
   @override
   void dispose() {
     super.dispose();
-    _ethClient.dispose();
-    _client.close();
   }
 
   @override
   Widget build(BuildContext context) {
-    // final _args = ModalRoute.of(context)!.settings.arguments as WalletArguments;
-    if (!_init) {
-      // _historyListener = Provider.of<BlockChain>(context, listen: false)
-      //     .addContracts(_args.address);
-      _init = true;
-    }
-    // final address = _args.address;
     List<Widget> _widgetOptions = <Widget>[
-      VoterHomePage(),
-      VoterHistory(),
-      // AccountCard(address: address),
-      // CreateBallotForm(
-      //   wallet: _args.wallet,
-      // ),
-      // History(
-      //   wallet: _args.wallet,
-      // ),
+      const VoterHomePage(),
+      const VoterHistory(),
     ];
     return Scaffold(
-      appBar: AppBar(
-          // title: Text(_args.name),
-          ),
+      appBar: AppBar(),
       backgroundColor: Theme.of(context).backgroundColor,
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
@@ -84,9 +60,11 @@ class _VoterPortalState extends State<VoterPortal> {
         currentIndex: _selectedIndex,
         selectedItemColor: Theme.of(context).toggleableActiveColor,
         onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+          if (mounted) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          }
         },
       ),
     );

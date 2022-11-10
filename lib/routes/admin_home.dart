@@ -45,21 +45,23 @@ class _AdminHomeState extends State<AdminHome> {
       if (_init) {
         if (_started == false) {
           _started = await _currentVote.started;
-          if (_started) setState(() {});
+          if (_started && mounted) setState(() {});
         } else {
           final List<int> newResults = await _currentVote.results;
           log('results: $results');
           log('newResults: $newResults');
           if (!listEquals(results, newResults)) {
-            setState(() {
-              log('newResults == results: ${listEquals(results, newResults)}');
-              results = newResults;
-            });
+            if (mounted) {
+              setState(() {
+                log('newResults == results: ${listEquals(results, newResults)}');
+                results = newResults;
+              });
+            }
           }
         }
         if (!_ended) {
           _ended = await _currentVote.ended;
-          if (_ended) setState(() {});
+          if (_ended && mounted) setState(() {});
         }
       }
     });
@@ -100,6 +102,7 @@ class _AdminHomeState extends State<AdminHome> {
   void _beginVote(Map<String, String> contract) async {
     log(contract.toString());
     _currentVote = CurrentVote(contract['address']!);
+    // TODO
     await _currentVote.update();
     topic = _currentVote.topic;
     _started = await _currentVote.started;
@@ -131,34 +134,33 @@ class _AdminHomeState extends State<AdminHome> {
     if (contract.isNotEmpty && !_init) {
       _beginVote(contract);
     }
-    // _currentVote.results.then((value) => print(value));
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+      ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (contract.isEmpty) const Text('Transaction Broadcasting...'),
-            if (contract.isNotEmpty)
-              ListTile(
-                title: const Text('Contract Address'),
-                subtitle: Text(contract['address']!),
-              ),
-            if (!_started) const Text('The vote will begin shortly'),
-            if (_started && !_ended) const Text('Voting in Progress...'),
-            if (_ended) const Text('Voting Complete'),
-            // Text('tx: ${widget.tx}', overflow: TextOverflow.visible),
-            // if (contract.isNotEmpty) ...[
-            //   Text('In Progress: $_started'),
-            //   Text('Topic: ${widget.question}'),
-            //   const Text('Results'),
-            //   Text('${widget.choices[0]}: ${results[0]}'),
-            //   Text('${widget.choices[1]}: ${results[1]}'),
-            //   Text(
-            //     'address: ${contract['address']}',
-            //     overflow: TextOverflow.visible,
-            //   ),
-            // ],
-          ],
+        child: Card(
+          elevation: 8,
+          margin: const EdgeInsets.all(8),
+          child: Padding(
+            padding: const EdgeInsets.all(11.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (contract.isEmpty) const Text('Transaction Broadcasting...'),
+                if (contract.isNotEmpty)
+                  ListTile(
+                    title: const Text('Contract Address'),
+                    subtitle: Text(contract['address']!),
+                  ),
+                const Divider(),
+                if (!_started) const Text('The vote will begin shortly.'),
+                if (_started && !_ended) const Text('Voting in Progress...'),
+                if (_ended) const Text('Voting Complete'),
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -61,29 +61,26 @@ class VoterProvider with ChangeNotifier {
       if (tx['to'] != address.hex) continue;
       final txString = tx['input'] as String;
       final txParsed = txString.substring(txString.length - 40);
-      print(txParsed);
       final tryVote = CurrentVote('0x' + txParsed);
-      List<dynamic> started;
-      List<dynamic> ended;
+      bool started;
+      bool ended;
       try {
-        started = await tryVote.query('started', []);
-        ended = await tryVote.query('ended', []);
+        started = await tryVote.started;
+        ended = await tryVote.ended;
       } catch (_) {
         break;
       }
-      if (ended[0] == true) {
-        break;
-      }
-      // print(tryVote.contractAddress);
-      // print(currentVote?.contractAddress);
-      // final locked = await tryVote.query('locked', []);
-      if (started[0] == true && currentVote == null) {
-        print(tryVote.contractAddress);
+      if (started == true && ended == false && currentVote == null) {
         currentVote = tryVote;
         await currentVote!.update();
         notifyListeners();
         break;
       }
+      if (ended == true && currentVote != null) {
+        currentVote = null;
+        notifyListeners();
+      }
+      break;
     }
   }
 }

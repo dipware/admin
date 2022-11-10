@@ -14,6 +14,15 @@ class BlockChain with ChangeNotifier {
   final Map<String, StreamSubscription<String>> _listeners = {};
   List<Map<String, String>> _contracts = [];
 
+  @override
+  void dispose() {
+    super.dispose();
+    for (var listener in _listeners.values) {
+      listener.cancel();
+    }
+    _ethClient.dispose();
+  }
+
   Future<StreamSubscription<String>> add(String address) async {
     if (_balances[address] != null) {
       throw Exception('Double reference');

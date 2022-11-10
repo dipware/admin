@@ -42,12 +42,12 @@ class _VoterHomePageState extends State<VoterHomePage> {
     _credentials = EthPrivateKey.fromInt(VoterHomePage.debugWallets[deviceId]!);
     _voter = VoterProvider(_credentials);
     _voter.addListener(() async {
-      if (_voter.currentVote != null && !_started) {
-        _started = true;
-        _voter.currentVote!
-            .query('ended', []).then((value) => print('ended: $value'));
-        setState(() {});
+      if (_voter.currentVote != null) {
+        _inProgress = true;
+      } else {
+        _inProgress = false;
       }
+      if (mounted) setState(() {});
     });
     _address = (await _credentials.extractAddress()).hex;
     log('Voter address: $_address');
@@ -99,17 +99,17 @@ class _VoterHomePageState extends State<VoterHomePage> {
   Widget _cardTitle() {
     final address = _voter.currentVote!.contractAddress;
     return ListTile(
-      title: Text('Vote/Contract Address'),
+      title: const Text('Vote/Contract Address'),
       subtitle: Text(address),
-      trailing:
-          IconButton(onPressed: () {}, icon: const Icon(Icons.open_in_browser)),
+      // trailing:
+      //     IconButton(onPressed: () {}, icon: const Icon(Icons.open_in_browser)),
     );
   }
 
   Widget _topic() {
     final topic = _voter.currentVote!.topic;
     return ListTile(
-      title: Text('Topic'),
+      title: const Text('Topic'),
       subtitle: Text(topic),
     );
   }
@@ -126,7 +126,7 @@ class _VoterHomePageState extends State<VoterHomePage> {
             onPressed: () {
               _voter.currentVote!.submit('sendBallot', _credentials, [
                 BigInt.from(choices.indexOf(choice))
-              ]).then((value) => print(value));
+              ]).then((value) => print('tx: $value'));
             },
           ),
         ),
@@ -138,18 +138,9 @@ class _VoterHomePageState extends State<VoterHomePage> {
     );
   }
 
-  bool _started = false;
+  bool _inProgress = false;
   @override
   Widget build(BuildContext context) {
-    if (_started) {
-      _voter.currentVote!.query('ended', []).then((value) {
-        if (value[0] == true) {
-          Navigator.of(context).pop();
-        }
-      });
-    }
-    // if (_started) print(_voter.currentVote!.topic);
-    final _blockchain = Provider.of<BlockChain>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       body: Center(
@@ -160,11 +151,8 @@ class _VoterHomePageState extends State<VoterHomePage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: !_started
+                    children: !_inProgress
                         ? ([
-                            Text(_address),
-                            Text(
-                                '${_blockchain.balances[_address]?.getValueInUnit(EtherUnit.ether)}'),
                             const Text(
                               "To register, click \"Show QR\" and have the voting administrator scan the code that appears.",
                               overflow: TextOverflow.visible,

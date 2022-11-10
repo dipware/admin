@@ -118,11 +118,10 @@ class CurrentVote with ChangeNotifier {
       data: tx.data,
     );
     log("Gas Estimate $functionName($args): $estimate");
-    final result = ethClient.sendTransaction(
+    final result = await ethClient.sendTransaction(
       credentials,
       tx,
       chainId: int.parse(dotenv.env['CHAIN_ID']!),
-      // chainId: 11155111,
     );
     ethClient.dispose();
     return result;
