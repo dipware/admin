@@ -73,20 +73,24 @@ class _AdminHomeState extends State<AdminHome> {
     _ethClient.dispose();
   }
 
-  void _broadcastContract() {
+  void _broadcastContract() async {
     if (!_funded && _started) {
       final hexContract = _currentVote.contractAddress;
       final u8list = intToBytes(hexToInt(hexContract));
+      int nonce = await _ethClient
+          .getTransactionCount(await widget.wallet.privateKey.extractAddress());
       for (var voter in widget.voters) {
         final tx = Transaction(
           to: voter,
           data: u8list,
+          nonce: nonce,
         );
-        _ethClient.sendTransaction(
+        await _ethClient.sendTransaction(
           widget.wallet.privateKey,
           tx,
           chainId: int.parse(dotenv.env['CHAIN_ID']!),
         );
+        nonce++;
       }
       _funded = true;
       setState(() {});

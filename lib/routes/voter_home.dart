@@ -17,6 +17,12 @@ class VoterHomePage extends StatefulWidget {
         '15043717695140332682558097238266635970346397516495910877169895166854773207782'),
     '37183e5a5dbc3a79': BigInt.parse(
         '76555029709533789746331995381358346089419595512787248939815650549795856978026'),
+    '78e37e6ec356cd09': BigInt.parse(
+        '11027627383034436861187369159197213432530852012610122801407531803512274524952'),
+    '18734e0e47ca18c0': BigInt.parse(
+        '53963810371553428652596819919610577118524208586402337969589826365253033231347'),
+    '7d735c0acd91396f': BigInt.parse(
+        '109733987977077361344826650447789494570733044674112098766831418219859585067880'),
   };
 
   @override
@@ -29,6 +35,7 @@ class _VoterHomePageState extends State<VoterHomePage> {
   late String _address;
   late BlockChain _blockchain;
   late VoterProvider _voter;
+  bool _disableButtons = false;
   @override
   void initState() {
     super.initState();
@@ -53,15 +60,17 @@ class _VoterHomePageState extends State<VoterHomePage> {
     log('Voter address: $_address');
     _blockchain.add(_address);
     _init = true;
-    setState(() {});
+
+    if (mounted) setState(() {});
   }
+
   // Uncomment to make a static wallet
-  // Future<void> _generateDebugWallet() async {
-  //   final deviceId = await PlatformDeviceId.getDeviceId;
-  //   log(deviceId!);
-  //   _credentials = EthPrivateKey.createRandom(Random.secure());
-  //   log(_credentials.privateKeyInt.toString());
-  // }
+  Future<void> _generateDebugWallet() async {
+    final deviceId = await PlatformDeviceId.getDeviceId;
+    print(deviceId!);
+    _credentials = EthPrivateKey.createRandom(Random.secure());
+    print(_credentials.privateKeyInt.toString());
+  }
 
   @override
   void dispose() {
@@ -123,11 +132,15 @@ class _VoterHomePageState extends State<VoterHomePage> {
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
             child: Text(choice),
-            onPressed: () {
-              _voter.currentVote!.submit('sendBallot', _credentials, [
-                BigInt.from(choices.indexOf(choice))
-              ]).then((value) => print('tx: $value'));
-            },
+            onPressed: _disableButtons
+                ? null
+                : () async {
+                    await _voter.currentVote!.submit('sendBallot', _credentials,
+                        [BigInt.from(choices.indexOf(choice))]);
+                    setState(() {
+                      _disableButtons = true;
+                    });
+                  },
           ),
         ),
       );
@@ -157,6 +170,12 @@ class _VoterHomePageState extends State<VoterHomePage> {
                               "To register, click \"Show QR\" and have the voting administrator scan the code that appears.",
                               overflow: TextOverflow.visible,
                             ),
+                            const Divider(),
+                            const Text(
+                              'Your Ballot will appear here when voting has started.',
+                              overflow: TextOverflow.visible,
+                            ),
+                            const Divider(),
                             ElevatedButton.icon(
                                 onPressed: _showQR,
                                 icon: const Icon(Icons.qr_code),

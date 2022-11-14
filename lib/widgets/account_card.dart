@@ -23,7 +23,7 @@ class _AccountCardState extends State<AccountCard> {
   @override
   Widget build(BuildContext context) {
     final address = widget.address;
-    log('Current Address: $address');
+    print('Current Address: $address');
     return Center(
       child: Card(
         child: Padding(

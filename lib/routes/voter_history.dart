@@ -36,9 +36,9 @@ class VoterHistory extends StatefulWidget {
 }
 
 class _VoterHistoryState extends State<VoterHistory> {
-  final _client = Client();
+  final Client? _client = Client();
   late Web3Client _ethClient;
-  late StreamSubscription<String> _listener;
+  StreamSubscription<String>? _listener;
   bool _noHistory = false;
 
   // bool _init = false;
@@ -48,15 +48,15 @@ class _VoterHistoryState extends State<VoterHistory> {
   @override
   void initState() {
     super.initState();
-    _ethClient = Web3Client(dotenv.env['ETH_CLIENT']!, _client);
+    _ethClient = Web3Client(dotenv.env['ETH_CLIENT']!, _client!);
     _init();
   }
 
   @override
   void dispose() {
     super.dispose();
-    _listener.cancel();
-    _client.close();
+    _listener?.cancel();
+    _client?.close();
     _ethClient.dispose();
   }
 
@@ -65,13 +65,20 @@ class _VoterHistoryState extends State<VoterHistory> {
     final debugWallet = VoterHomePage.debugWallets[deviceId];
     if (debugWallet != null) {
       _credentials = EthPrivateKey.fromInt(debugWallet);
+      // _ethClient.sendTransaction(
+      //     _credentials,
+      //     Transaction(
+      //         to: EthereumAddress.fromHex(
+      //             '0x5889d2735d72060444944297b1ccda6ae95fac1f'),
+      //         value: EtherAmount.fromUnitAndValue(EtherUnit.finney, 100)),
+      //     chainId: 11155111);
     } else {}
     _address = (await _credentials.extractAddress()).hex;
     print('address: $_address');
 
-    _fetchHistory();
-    _listener = _ethClient.addedBlocks().listen((blockHash) {
-      _fetchHistory();
+    await _fetchHistory();
+    _listener = _ethClient.addedBlocks().listen((blockHash) async {
+      await _fetchHistory();
     });
   }
 
@@ -86,22 +93,23 @@ class _VoterHistoryState extends State<VoterHistory> {
       'apikey': esKey,
     });
 
-    final responseRaw = await http.get(uri);
+    final responseRaw = await _client?.get(uri);
+    if (responseRaw == null) return;
     final response = jsonDecode(responseRaw.body) as Map<String, dynamic>;
     final List<dynamic> result = response['result'];
-    final List<PastVote> newHistory = [];
     for (final tx in result.reversed) {
       if (tx['isError'] == '1') continue;
       final txString = tx['to'] as String;
       if (txString != _address) {
         final tryVote = CurrentVote(txString);
         try {
+          final txHash = tx['hash'];
+          if (pastVotes.any((element) => element.txHash == txHash)) continue;
           final version = await tryVote.version;
           if (version != '1.0') continue;
           final started = await tryVote.started;
           final ended = await tryVote.ended;
           if (started && ended) {
-            final txHash = tx['hash'];
             final topic = await tryVote.query('topic', []);
             final numChoices = await tryVote.query('numChoices', []);
             final chosenI = await tryVote
@@ -112,23 +120,24 @@ class _VoterHistoryState extends State<VoterHistory> {
               final choice = await tryVote.query('choices', [BigInt.from(i)]);
               choices.add(choice[0]);
             }
-            newHistory.add(PastVote(txString, topic[0], chosen[0], txHash));
+            pastVotes.add(PastVote(txString, topic[0], chosen[0], txHash));
+            if (mounted) setState(() {});
           }
         } catch (_) {
           continue;
         }
       }
     }
-    if (mounted && pastVotes.length != newHistory.length) {
-      setState(() {
-        pastVotes = newHistory;
-      });
-    }
-    if (mounted && newHistory.isEmpty) {
-      setState(() {
-        _noHistory = true;
-      });
-    }
+    // if (mounted && pastVotes.length != newHistory.length) {
+    //   setState(() {
+    //     pastVotes = newHistory;
+    //   });
+    // }
+    // if (mounted && newHistory.isEmpty) {
+    //   setState(() {
+    //     _noHistory = true;
+    //   });
+    // }
   }
 
   @override
@@ -155,7 +164,7 @@ class _VoterHistoryState extends State<VoterHistory> {
                   trailing: IconButton(
                       onPressed: () async {
                         final uri = Uri.parse(
-                            'https://goerli.etherscan.io/tx/${pastVotes[index].txHash}');
+                            'https://sepolia.etherscan.io/tx/${pastVotes[index].txHash}');
                         await launchUrl(uri);
                       },
                       icon: const Icon(Icons.open_in_new)),

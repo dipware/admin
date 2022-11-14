@@ -31,10 +31,9 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
       widgets.add(TextFormField(
         minLines: 1,
         maxLines: 3,
-        initialValue: 'Debug Question',
-        decoration: InputDecoration(
-          hintText: "Question $i",
-          icon: const Icon(Icons.question_mark),
+        decoration: const InputDecoration(
+          hintText: "Question",
+          icon: Icon(Icons.question_mark),
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -87,7 +86,6 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
     final List<TextFormField> choiceFields = [];
     for (var i = 1; i <= numberofChoices; i++) {
       choiceFields.add(TextFormField(
-        initialValue: 'Debug Choice $i',
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Choice text is required.';
@@ -121,40 +119,6 @@ class _CreateBallotFormState extends State<CreateBallotForm> {
                     'New Ballot',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                  // Row(
-                  //   children: [
-                  //     Expanded(
-                  //       child: Text(
-                  //         "Number of Questions:",
-                  //         style: Theme.of(context).textTheme.titleMedium,
-                  //       ),
-                  //     ),
-                  //     SizedBox(
-                  //       width: 50,
-                  //       child: DropdownButtonFormField<int>(
-                  //         value: 1,
-                  //         items: [1, 2, 3, 4, 5]
-                  //             .map((e) => DropdownMenuItem<int>(
-                  //                 value: e, child: Text(e.toString())))
-                  //             .toList(),
-                  //         onChanged: (value) {
-                  //           setState(() {
-                  //             for (int i = 1; i <= value!; i++) {
-                  //               if (!_qAndA.containsKey(i)) {
-                  //                 _qAndA[i] = 2;
-                  //               }
-                  //             }
-                  //             for (int i = value + 1; i <= 5; i++) {
-                  //               if (_qAndA.containsKey(i)) {
-                  //                 _qAndA.remove(i);
-                  //               }
-                  //             }
-                  //           });
-                  //         },
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
                   ...questions,
                   const SizedBox(
                     height: 11,

@@ -22,7 +22,6 @@ class _WalletsListPageState
   List<Card> _wallets = [];
   final _nameController = TextEditingController();
   final _pwUnlockController = TextEditingController();
-  bool _init = false;
 
   @override
   void initState() {
@@ -33,10 +32,7 @@ class _WalletsListPageState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_init) {
-      fetchWalletTiles();
-      _init = true;
-    }
+    fetchWalletTiles();
   }
 
   // @override
@@ -50,8 +46,12 @@ class _WalletsListPageState
           final addressRe = RegExp(r'0x[a-fA-F0-9]{40}');
           final address = addressRe.firstMatch(filename)![0];
           final blockchain = Provider.of<BlockChain>(context, listen: false);
-          blockchain.add(address!);
-          // final balance = Web3Client(url, httpClient)
+          try {
+            blockchain.add(address!);
+            // ignore: empty_catches
+          } on Exception catch (e) {
+            print(e);
+          }
           return Card(
             child: ListTile(
               onTap: () {
@@ -97,7 +97,7 @@ class _WalletsListPageState
                                           context,
                                           WalletHome.routeName,
                                           arguments: WalletArguments(
-                                              title, address, wallet),
+                                              title, address!, wallet),
                                         );
                                       } on ArgumentError {
                                         showDialog(
